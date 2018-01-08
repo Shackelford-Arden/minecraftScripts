@@ -17,20 +17,35 @@
 
 module.exports = {
 
+  installVanillaServer: function(){
+    //stop the MC server
+    exec("../../minecraftCommands.sh installVanilla")
+  },
+  installForgeServer: function(){
+    //stop the MC server
+    exec("../../minecraftCommands.sh installForge")
+  },
+  uninstallServer: function(){
+    //stop the MC server
+    exec("../../minecraftCommands.sh uninstall")
+  },
   stopServer: function(){
     //stop the MC server
-    
+    exec("../../minecraftCommands.sh stopServer")
   },
 
   startServer: function(){
     //start the MC server
+    exec("../../minecraftCommands.sh startServer")
   },
-
+  
   runBackup: function(){
     //run a backup of the server files
+    exec("../../minecraftCommands.sh backupServer")
   },
-
+  
   renderMap: function(){
     //render the dynmap and update files accordingly
+    exec("../../renderMineCraftMap.sh")
   }
 };

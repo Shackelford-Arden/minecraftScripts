@@ -305,6 +305,22 @@ installServer() {
   tmux kill-session -t $tmuxSessionName
   echo "killed tmux"
 }
+removeMinecraft(){
+  if [[ -d ${installDir} ]];
+  then
+    echo "An installation exists."
+    echo "Removing..."
+    rm -rf ${installDir}
+    echo "Cleanup /tmp..."
+    rm /tmp/mcVersion.json
+    find /tmp -iname "*forge*.jar" -delete
+    find /tmp -iname "*minecraft*.jar" -delete
+    rm /tmp/mcVersion.json
+  else
+    echo "${installDir} Doesn't exist. Nothing to remove."
+    echo "Nothing else to see here... move along..."
+  fi
+}
 usage() {
   echo "minecraftCommands.sh vanilla|forge startServer|stopServer|backupServer"
 }
@@ -331,6 +347,11 @@ case $action in
     ;;
   "getVersions")
     getLatestVersions
+    ;;
+  "cleanupScript")
+  "uninstall")
+  "remove")
+    removeMinecraft
     ;;
   *)
     echo "Action not recognized."
