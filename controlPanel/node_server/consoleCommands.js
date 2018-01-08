@@ -16,39 +16,37 @@
 **************************************************************/
 
 module.exports = {
-  exec: function(){
-    return require('child_process').exec
-  },
-
   installVanillaServer: function(){
     //stop the MC server
-    exec("../../minecraftCommands.sh installVanilla")
+    require('child_process').exec("../../minecraftCommands.sh installVanilla")
   },
   installForgeServer: function(){
     //stop the MC server
-    exec("../../minecraftCommands.sh installForge")
+    require('child_process').exec("../../minecraftCommands.sh installForge")
   },
   uninstallServer: function(){
     //stop the MC server
-    exec("../../minecraftCommands.sh uninstall")
+    require('child_process').exec("../../minecraftCommands.sh uninstall")
   },
   stopServer: function(){
     //stop the MC server
-    exec("../../minecraftCommands.sh stopServer")
+    require('child_process').exec("../../minecraftCommands.sh stopServer")
   },
 
   startServer: function(){
     //start the MC server
-    exec("../../minecraftCommands.sh startServer")
+    console.log("starting Server")
+    require('child_process').exec("../../minecraftCommands.sh startServer")
+    console.log("started Server")
   },
   
   runBackup: function(){
     //run a backup of the server files
-    exec("../../minecraftCommands.sh backupServer")
+    require('child_process').exec("../../minecraftCommands.sh backupServer")
   },
   
   renderMap: function(){
     //render the dynmap and update files accordingly
-    exec("../../renderMineCraftMap.sh")
+    require('child_process').exec("../../renderMineCraftMap.sh")
   }
 };

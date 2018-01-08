@@ -46,8 +46,17 @@ io.listen(server).on('connection', function(socket){
     console.log("The server and client are connected");
     socket.emit("connected");
     //listen for what method to call
-    socket.on("startServer",        command.startServer);
-    socket.on("stopServer",         command.stopServer);
+    socket.on("startServer",()=>{
+        exec("cd ../..; ./minecraftCommands.sh startServer",puts)
+        console.log("Started Server")
+    })
+    socket.on("stopServer",()=>{
+        exec("cd ../..; ./minecraftCommands.sh stopServer",puts)
+        console.log("Stoped Server")
+    })
+    
+    // socket.on("startServer",        command.startServer);
+    // socket.on("stopServer",         command.stopServer);
     // socket.on("runBabkup",          command.runBabkup);
     // socket.on("renderMap",          command.renderMap);
     // socket.on("installVanillaServer",command.installVanillaServer);
