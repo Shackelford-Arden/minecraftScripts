@@ -298,8 +298,12 @@ installServer() {
   find $installDir -iname "*-installer.jar" -delete
 
   ### Start Server
-  tmux send -t $tmuxSessionName 'java -Xms1G -Xmx1G -jar '${installDir}'forge-'${comboVersion}'-universal.jar nogui' ENTER
+  # tmux send -t $tmuxSessionName 'java -Xms1G -Xmx1G -jar '${installDir}'forge-'${comboVersion}'-universal.jar nogui' ENTER
 
+  ### end session
+  echo "about to kill tmux"
+  tmux kill-session -t $tmuxSessionName
+  echo "killed tmux"
 }
 usage() {
   echo "minecraftCommands.sh vanilla|forge startServer|stopServer|backupServer"
