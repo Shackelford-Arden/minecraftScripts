@@ -19,6 +19,7 @@ module.exports = {
 
   stopServer: function(){
     //stop the MC server
+    
   },
 
   startServer: function(){

@@ -5,7 +5,7 @@
 
 # Get Latest versions before installing
 
-./minecraftCommands getVersions
+./minecraftCommands.sh getVersions
 
 
 ## TODO Add support for other popular distros (Fedora, CentOS, Arch, etc)
@@ -17,14 +17,13 @@ then
   echo "Please run this script as root."
   exit 20
 fi
-
+echo "Set Variables"
 ## Set variables
 mcVersionMohjang=""
 versionFileURL=""
 javaVersion=""
-installDir=$(grep "installDir=\K.*")
 
-
+echo "set installation dir"
 ### Set Installation Directory
 installDir=$1
 if [[ -z ${installDir} ]];
@@ -118,6 +117,7 @@ mcVersionMohjang=$(grep -oP "\"release\":\"\K\d{1,2}\.\d{1,2}\.\d{1,2}" /tmp/mcV
 wget -N https://s3.amazonaws.com/Minecraft.Download/versions/${mcVersionMohjang}/minecraft_server.${mcVersionMohjang}.jar -O /tmp/minecraft_server.${mcVersionMohjang}.jar
 
 ### Copy server.jar to /opt/minecraft
+echo "Copy server.jar to /opt/minecraft"
 
 cp  /tmp/minecraft_server.${mcVersionMohjang}.jar $installDir
 
@@ -169,15 +169,15 @@ echo "Making changes to the server.properties."
 ### Change Configuration Files
 servPropFile=${installDir}server.properties
 #### Set level-type to BIOMESOP
-sed -i 's~DEFAULT~BIOMESOP~' ${servPropFile}
+sed -i 's/DEFAULT/BIOMESOP/' ${servPropFile}
 
 #### Set Generator Settings
 
 ## Using ~ as a sperator due to the large amount of forward slashes in the desired line
-sed -i 's~generator-settings\=~generator-settings={"landScheme"\:"vanilla","tempScheme"\:"medium_zones","rainScheme"\:"medium_zones","biomeSize"\:"medium","amplitude"\:1.0,"generateBopOre"\:true,"generateBopSoils"\:true,"generateBopTrees"\:true,"generateBopGrasses"\:true,"generateBopFoliage"\:true,"generateBopFlowers"\:true,"generateBopPlants"\:true,"generateBopWaterPlants"\:true,"generateBopMushrooms"\:true,"generateRockFormations"\:true,"generatePoisonIvy"\:false,"generateFlax"\:true,"generateBerryBushes"\:true,"generateThorns"\:true,"generateQuicksand"\:true,"generateLiquidPoison"\:true,"generateHotSprings"\:true,"generateNetherHives"\:true,"generateNetherPlants"\:true,"generateEndFeatures"\:true}~' ${servPropFile}
+sed -i 's/generator-settings\=/generator-settings={"landScheme"\:"vanilla","tempScheme"\:"medium_zones","rainScheme"\:"medium_zones","biomeSize"\:"medium","amplitude"\:1.0,"generateBopOre"\:true,"generateBopSoils"\:true,"generateBopTrees"\:true,"generateBopGrasses"\:true,"generateBopFoliage"\:true,"generateBopFlowers"\:true,"generateBopPlants"\:true,"generateBopWaterPlants"\:true,"generateBopMushrooms"\:true,"generateRockFormations"\:true,"generatePoisonIvy"\:false,"generateFlax"\:true,"generateBerryBushes"\:true,"generateThorns"\:true,"generateQuicksand"\:true,"generateLiquidPoison"\:true,"generateHotSprings"\:true,"generateNetherHives"\:true,"generateNetherPlants"\:true,"generateEndFeatures"\:true}/' ${servPropFile}
 
 #### Set Difficulty
-sed -i 's~difficulty=[1,9]~difficulty=3~' ${servPropFile}
+sed -i 's/difficulty=[1,9]/difficulty=3/' ${servPropFile}
 
 ### Download Mods
 
