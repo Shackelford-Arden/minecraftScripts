@@ -71,13 +71,15 @@ getLatestVersions() {
   echo "Getting MineCraft Forge server files..."
   forgeManifest="/tmp/forgeManifest.html"
   wget -qN https://files.minecraftforge.net  -O ${forgeManifest}
-
+  
+  echo "find reccomended version"
   # Find Recommended Version
   recommendedForge=$(grep -A1 "Download Recommended" ${forgeManifest} | grep -oP "<small>\K\d{1,2}\.\d{1,2}\.\d{1,2} - \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,4}" | sed 's/[[:space:]]//g')
 
   ## Set Recommended Version in versions.txt
   sed -i "s/(recommendedForge=).*/${recommendedForge}/" ${serverVersions}
 
+  echo "find latest version"
   # Find Latest Version
   latestForge=$(grep -A1 "Download Latest" ${forgeManifest} | grep -oP "<small>\K\d{1,2}\.\d{1,2}\.\d{1,2} - \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,4}" | sed 's/[[:space:]]//g')
 
@@ -86,6 +88,7 @@ getLatestVersions() {
   echo "End get latest version"
 }
 startServer() {
+  echo "starting 'startServer()'"
   # Let's start the Server
   tmux new -ds minecraftServer
   tmux send -t minecraftServer 'cd '${installDir} ENTER
@@ -94,6 +97,7 @@ startServer() {
     "vanilla")
       if [[ -f ${installDir}minecraft_server.${vanillaVersion}.jar ]];
       then
+        # tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'minecraft_server.*.jar nogui' ENTER
         tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'minecraft_server.'${vanillaVersion}'.jar nogui' ENTER
       else
         echo "Failed to start server; ${installDir}minecraft_server.${vanillaVersion}.jar could not be found."
@@ -102,11 +106,12 @@ startServer() {
       fi
       ;;
     "forge")
-      if [[ -f ${installDir}forge-${forgeVersion}-universal.jar ]];
+      if [[ -f "${installDir}forge-${latestForge}-universal.jar" ]];
       then
-        tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'forge-'${forgeVersion}'-universal.jar nogui' ENTER
+        # tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'forge-*-universal.jar nogui' ENTER
+        tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'forge-'${latestForge}'-universal.jar nogui' ENTER
       else
-        echo "Failed to start server; ${installDir}forge-${forgeVersion}-universal.jar could not be found."
+        echo "Failed to start server; ${installDir}forge-${latestForge}-universal.jar could not be found."
         echo "Please look into this and try again."
         exit 1
       fi
@@ -245,7 +250,7 @@ installServer() {
   sleep 60
   echo "$(tput setaf 1)Stop server$(tput sgr0)"
   tmux send -t ${tmuxSessionName} "/stop" ENTER
-  if [[serverType -eq "forge"]];
+  if [[ "${serverType}" == "forge" ]];
   then
       ## Download & Install MC Forge
 
@@ -258,10 +263,12 @@ installServer() {
       wget -qN https://files.minecraftforge.net  -O ${forgeInfoPage}
       mcForgeRecommendedVersion=$(grep -Po "<small>\K\d{1,2}\.\d{1,2}\.\d{1,2} - \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,4}" ${forgeInfoPage} | tail -n 1 | sed 's/[[:space:]]//g')
 
-      echo "Current Recommended version is: ${mcForgeRecommendedVersion}"
+      echo "Current Recommended version is: ${latestForge}"
+      # echo "Current Recommended version is: ${mcForgeRecommendedVersion}"
       echo "Downloading now..."
       ### Download recommended version
-      comboVersion="${mcForgeRecommendedVersion}"
+      comboVersion="${latestForge}"
+      # comboVersion="${mcForgeRecommendedVersion}"
       wget -qN http://files.minecraftforge.net/maven/net/minecraftforge/forge/${comboVersion}/forge-${comboVersion}-installer.jar -O ${installDir}forge-${comboVersion}-installer.jar
 
       echo "Installing Forge..."
@@ -327,12 +334,16 @@ usage() {
 
 case $action in
   "startServer")
+    getLatestVersions
+    serverType="forge"
     startServer
     ;;
   "stopServer")
+    getLatestVersions
     stopServer
     ;;
   "backupServer")
+    getLatestVersions
     backupServer
     ;;
   "installVanilla")
@@ -348,9 +359,7 @@ case $action in
   "getVersions")
     getLatestVersions
     ;;
-  "cleanupScript")
-  "uninstall")
-  "remove")
+  "cleanupScript"|  "uninstall"|  "remove")
     removeMinecraft
     ;;
   *)
