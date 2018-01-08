@@ -17,8 +17,12 @@
 **************************************************************/
 
 // set up needed modules
-var http = require('http');
-var io   = require('socket.io');
+var express = require('express')
+var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+// var http = require('http');
+// var io   = require('socket.io');
 var util = require('util');
 var exec = require('child_process').exec;
 
@@ -33,7 +37,7 @@ var puts = function (error, stdout, stderr) {
 
 //create the server and start listening on the defined port
 const PORT = 8080;
-var server = http.createServer();
+// var server = http.createServer();
 server.listen(PORT);
 console.log("Listening for a connection...");
 //recieves the connection from the client and passes in a socket
@@ -58,3 +62,8 @@ io.listen(server).on('connection', function(socket){
 //    socket.on("runBabkup",   command.runBabkup());
 //    socket.on("renderMap",   command.renderMap());
 });
+app.use(express.static('client'))
+// app.get('*', function (req, res) {
+//     res.sendfile(__dirname + '/client/');
+//   });
+  
