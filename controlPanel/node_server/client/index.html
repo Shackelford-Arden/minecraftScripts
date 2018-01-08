@@ -22,10 +22,12 @@
       });
 
   function startServer(){
-    socket.emit("startServer");
-  }
-
-  function stopServer(){
+      console.log("startingServer")
+      socket.emit("startServer");
+    }
+    
+    function stopServer(){
+        console.log("stopingServer")
     socket.emit("stopServer");
   }
 </script>

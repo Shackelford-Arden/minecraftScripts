@@ -16,6 +16,9 @@
 **************************************************************/
 
 module.exports = {
+  exec: function(){
+    return require('child_process').exec
+  },
 
   installVanillaServer: function(){
     //stop the MC server
