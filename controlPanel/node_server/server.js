@@ -54,7 +54,15 @@ io.listen(server).on('connection', function(socket){
         exec("cd ../..; ./minecraftCommands.sh stopServer",puts)
         console.log("Stoped Server")
     })
-    
+    socket.on("uninstallServer",()=>{
+        exec("cd ../..; ./minecraftCommands.sh uninstall",puts)
+        console.log("Stoped Server")
+    })
+    socket.on("installServer",()=>{
+        exec("cd ../..; ./minecraftCommands.sh installForge",puts)
+        console.log("Stoped Server")
+    })
+// I would like to use these, but module.exports aren't working right with exec()
     // socket.on("startServer",        command.startServer);
     // socket.on("stopServer",         command.stopServer);
     // socket.on("runBabkup",          command.runBabkup);

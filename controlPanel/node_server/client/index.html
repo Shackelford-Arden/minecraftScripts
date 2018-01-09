@@ -21,15 +21,25 @@
       console.log("Connection was made!");
       });
 
-  function startServer(){
+    function startServer(){
       console.log("startingServer")
       socket.emit("startServer");
     }
     
     function stopServer(){
         console.log("stopingServer")
-    socket.emit("stopServer");
-  }
+        socket.emit("stopServer");
+    }
+    function uninstallServer(){
+        console.log("removing server installation")
+        socket.emit("uninstallServer");
+    }
+
+    function installServer(){
+        console.log("creating server installation")
+        socket.emit("installServer");
+    }
+  
 </script>
 
     <nav class="nav-extended">
@@ -75,7 +85,9 @@
                     <span class="card-title"><h3>The Beginning and End...</h3></span>
                     <p>Go ahead... click one... you know you want to.</p>
                     <a class="waves-effect waves-light btn" onclick="startServer()">Start Server</a>
-                    <a class="waves-effect waves-light btn" onclick="stopServer()">Stop Server</a>
+                    <a class="waves-effect waves-light btn" onclick="stopServer()">Stop Server</a></br></br>
+                    <a class="waves-effect waves-light btn" onclick="uninstallServer()">Uninstall Server</a>
+                    <a class="waves-effect waves-light btn" onclick="installServer()">Install Forge Server</a>
                 </div>
             </div>
 

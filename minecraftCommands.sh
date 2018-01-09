@@ -64,7 +64,7 @@ getLatestVersions() {
   # Add version to serverInfo.properties
   sed -i "s/(vanillaVersion=).*/${vanillaVersion}/" ${serverVersions}
   echo "Vanilla Version: ${vanillaVersion}"
-  echo "Vanilla Versions: ${vanillaVersions}"
+  echo "Vanilla Versions: ${serverVersions}"
 
   # Check Forge Version
 
@@ -88,13 +88,15 @@ getLatestVersions() {
   echo "End get latest version"
 }
 startServer() {
-  echo "starting 'startServer()'"
+  echo "starting 'startServer()'";
   # Let's start the Server
   tmux new -ds minecraftServer
   tmux send -t minecraftServer 'cd '${installDir} ENTER
   echo "Starting ${serverType} server..."
   case $serverType in
     "vanilla")
+      echo "Inside vanilla exeution";
+      echo "starting ${installDir}minecraft_server.${vanillaVersion}.jar."
       if [[ -f ${installDir}minecraft_server.${vanillaVersion}.jar ]];
       then
         # tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'minecraft_server.*.jar nogui' ENTER
@@ -106,12 +108,14 @@ startServer() {
       fi
       ;;
     "forge")
-      if [[ -f "${installDir}forge-${latestForge}-universal.jar" ]];
+      echo "Inside forge exeution"
+      echo "Starting ${installDir}forge-${recommendedForge}-universal.jar."
+      if [[ -f "${installDir}forge-${recommendedForge}-universal.jar" ]];
       then
         # tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'forge-*-universal.jar nogui' ENTER
-        tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'forge-'${latestForge}'-universal.jar nogui' ENTER
+        tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'forge-'${recommendedForge}'-universal.jar nogui' ENTER
       else
-        echo "Failed to start server; ${installDir}forge-${latestForge}-universal.jar could not be found."
+        echo "Failed to start server; ${installDir}forge-${recommendedForge}-universal.jar could not be found."
         echo "Please look into this and try again."
         exit 1
       fi
@@ -120,7 +124,7 @@ startServer() {
       echo "Provided server type not recognized."
       echo "Usage: minecraftCommands.sh vanilla|forge"
   esac
-
+  echo "Ending startServer() function";
 }
 stopServer() {
   tmux send -t minecraftServer '/stop' ENTER
@@ -263,12 +267,12 @@ installServer() {
       wget -qN https://files.minecraftforge.net  -O ${forgeInfoPage}
       mcForgeRecommendedVersion=$(grep -Po "<small>\K\d{1,2}\.\d{1,2}\.\d{1,2} - \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,4}" ${forgeInfoPage} | tail -n 1 | sed 's/[[:space:]]//g')
 
-      echo "Current Recommended version is: ${latestForge}"
-      # echo "Current Recommended version is: ${mcForgeRecommendedVersion}"
+      # echo "Current Recommended version is: ${latestForge}"
+      echo "Current Recommended version is: ${mcForgeRecommendedVersion}"
       echo "Downloading now..."
       ### Download recommended version
-      comboVersion="${latestForge}"
-      # comboVersion="${mcForgeRecommendedVersion}"
+      # comboVersion="${latestForge}"
+      comboVersion="${mcForgeRecommendedVersion}"
       wget -qN http://files.minecraftforge.net/maven/net/minecraftforge/forge/${comboVersion}/forge-${comboVersion}-installer.jar -O ${installDir}forge-${comboVersion}-installer.jar
 
       echo "Installing Forge..."
@@ -329,7 +333,7 @@ removeMinecraft(){
   fi
 }
 usage() {
-  echo "minecraftCommands.sh vanilla|forge startServer|stopServer|backupServer"
+  echo "minecraftCommands.sh startServer | stopServer | backupServer | installVanilla | install | installForge | getVersions | cleanupScript | uninstall | remove"
 }
 
 case $action in
@@ -339,7 +343,6 @@ case $action in
     startServer
     ;;
   "stopServer")
-    getLatestVersions
     stopServer
     ;;
   "backupServer")
@@ -351,7 +354,7 @@ case $action in
     serverType="vanilla"
     installServer
     ;;
-  "installForge")
+  "install"| "installForge")
     getLatestVersions
     serverType="forge"
     installServer
