@@ -17,14 +17,12 @@ backupDir=$(grep -oP "backupDir=\K.*" ${serverProperties})
 backupServer() {
 
   # Check for Backup Dir
-  if [[ -d ${backupDir} ]];
-  then
+  if [[ -d ${backupDir} ]]; then
     echo "Backup directory exists. Continuing to backup."
   else
     echo "Backup dir doesn't exist. Creating..."
     mkdir ${backupDir}
-    if [[ -d ${backupDir} ]];
-    then
+    if [[ -d ${backupDir} ]]; then
       echo "Backup dir created. Moving on to backup..."
     else
       echo "Backup dir not created. Please check permissions for creating ${backupDir}"
@@ -40,7 +38,7 @@ backupServer() {
   echo "Set variable for backup name."
   # Create a variable that will use today's date.
   # Format: Year-Month-Day-Hour-Minute
-  backupTimeStamp=`date '+%Y-%m-%d-%H-%M'`;
+  backupTimeStamp=$(date '+%Y-%m-%d-%H-%M')
 
   echo "We'll move into the backup directory then create the backup"
   tmux send -t minecraftServer 'cd '${backupDir} ENTER
@@ -59,7 +57,7 @@ getLatestVersions() {
 
   # Check Vanilla Server Version
   vanillaManifest="https://launchermeta.mojang.com/mc/game/version_manifest.json"
-  wget -qN  ${vanillaManifest} -O /tmp/vanillaMCVersion.json
+  wget -qN ${vanillaManifest} -O /tmp/vanillaMCVersion.json
   vanillaVersion=$(grep -oP "\"release\":\"\K\d{1,2}\.\d{1,2}\.\d{1,2}" /tmp/vanillaMCVersion.json)
   # Add version to serverInfo.properties
   sed -i "s/(vanillaVersion=).*/${vanillaVersion}/" ${serverVersions}
@@ -70,16 +68,16 @@ getLatestVersions() {
 
   echo "Getting MineCraft Forge server files..."
   forgeManifest="/tmp/forgeManifest.html"
-  wget -qN https://files.minecraftforge.net  -O ${forgeManifest}
-  
-  echo "find reccomended version"
+  wget -qN https://files.minecraftforge.net -O ${forgeManifest}
+
+  echo "Find Reccomended version"
   # Find Recommended Version
   recommendedForge=$(grep -A1 "Download Recommended" ${forgeManifest} | grep -oP "<small>\K\d{1,2}\.\d{1,2}\.\d{1,2} - \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,4}" | sed 's/[[:space:]]//g')
 
   ## Set Recommended Version in versions.txt
   sed -i "s/(recommendedForge=).*/${recommendedForge}/" ${serverVersions}
 
-  echo "find latest version"
+  echo "Find Latest version"
   # Find Latest Version
   latestForge=$(grep -A1 "Download Latest" ${forgeManifest} | grep -oP "<small>\K\d{1,2}\.\d{1,2}\.\d{1,2} - \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,4}" | sed 's/[[:space:]]//g')
 
@@ -88,43 +86,42 @@ getLatestVersions() {
   echo "End get latest version"
 }
 startServer() {
-  echo "starting 'startServer()'";
+  echo "starting 'startServer()'"
   # Let's start the Server
   tmux new -ds minecraftServer
   tmux send -t minecraftServer 'cd '${installDir} ENTER
   echo "Starting ${serverType} server..."
   case $serverType in
-    "vanilla")
-      echo "Inside vanilla exeution";
-      echo "starting ${installDir}minecraft_server.${vanillaVersion}.jar."
-      if [[ -f ${installDir}minecraft_server.${vanillaVersion}.jar ]];
-      then
-        # tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'minecraft_server.*.jar nogui' ENTER
-        tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'minecraft_server.'${vanillaVersion}'.jar nogui' ENTER
-      else
-        echo "Failed to start server; ${installDir}minecraft_server.${vanillaVersion}.jar could not be found."
-        echo "Please look into this and try again."
-        exit 1
-      fi
-      ;;
-    "forge")
-      echo "Inside forge exeution"
-      echo "Starting ${installDir}forge-${recommendedForge}-universal.jar."
-      if [[ -f "${installDir}forge-${recommendedForge}-universal.jar" ]];
-      then
-        # tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'forge-*-universal.jar nogui' ENTER
-        tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'forge-'${recommendedForge}'-universal.jar nogui' ENTER
-      else
-        echo "Failed to start server; ${installDir}forge-${recommendedForge}-universal.jar could not be found."
-        echo "Please look into this and try again."
-        exit 1
-      fi
-      ;;
-    *)
-      echo "Provided server type not recognized."
-      echo "Usage: minecraftCommands.sh vanilla|forge"
+  "vanilla")
+    echo "Inside vanilla exeution"
+    echo "starting ${installDir}minecraft_server.${vanillaVersion}.jar."
+    if [[ -f ${installDir}minecraft_server.${vanillaVersion}.jar ]]; then
+      # tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'minecraft_server.*.jar nogui' ENTER
+      tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'minecraft_server.'${vanillaVersion}'.jar nogui' ENTER
+    else
+      echo "Failed to start server; ${installDir}minecraft_server.${vanillaVersion}.jar could not be found."
+      echo "Please look into this and try again."
+      exit 1
+    fi
+    ;;
+  "forge")
+    echo "Inside forge exeution"
+    echo "Starting ${installDir}forge-${recommendedForge}-universal.jar."
+    if [[ -f "${installDir}forge-${recommendedForge}-universal.jar" ]]; then
+      # tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'forge-*-universal.jar nogui' ENTER
+      tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'forge-'${recommendedForge}'-universal.jar nogui' ENTER
+    else
+      echo "Failed to start server; ${installDir}forge-${recommendedForge}-universal.jar could not be found."
+      echo "Please look into this and try again."
+      exit 1
+    fi
+    ;;
+  *)
+    echo "Provided server type not recognized."
+    echo "Usage: minecraftCommands.sh vanilla|forge"
+    ;;
   esac
-  echo "Ending startServer() function";
+  echo "Ending startServer() function"
 }
 stopServer() {
   tmux send -t minecraftServer '/stop' ENTER
@@ -133,8 +130,7 @@ installServer() {
   ## TODO Add support for other popular distros (Fedora, CentOS, Arch, etc)
   ## Check User; Exit if not root/sudo
   currUser=$EUID
-  if [[ ! ${currUser} -eq 0 ]];
-  then
+  if [[ ! ${currUser} -eq 0 ]]; then
     echo "Please run this script as root."
     exit 20
   fi
@@ -146,18 +142,15 @@ installServer() {
 
   echo "set installation dir"
   ### Set Installation Directory to default if not found in serverProperties
-  if [[ -z ${installDir} ]];
-  then
+  if [[ -z ${installDir} ]]; then
     installDir="/opt/minecraft/"
   fi
   ### Create Installation directory if it doesn't exist
-  if [[ -d ${installDir} ]];
-  then
+  if [[ -d ${installDir} ]]; then
     echo "Installation directory exists. Continuing..."
   else
     mkdir ${installDir}
-    if [[ -d $installDir ]];
-    then
+    if [[ -d $installDir ]]; then
       echo "Installation directory has been created in ${installDir}."
       echo "Continuing threw script."
     else
@@ -178,10 +171,12 @@ installServer() {
   ## Check for Java
   ### Is Java installed?
   echo "Checking for Java..."
-  checkJava=$(which java &>/dev/null ; echo $?)
+  checkJava=$(
+    which java &>/dev/null
+    echo $?
+  )
 
-  if [[ $checkJava -eq 0 ]];
-  then
+  if [[ $checkJava -eq 0 ]]; then
     echo "Java is installed... Checking version..."
     javaVersion=$(java -version 2>&1 | grep -oP "openjdk version \"\K\d{1,2}\.\d{1,2}\.\d{1}_\d{1,3}")
     echo "The Java version I found is: ${javaVersion}"
@@ -191,32 +186,30 @@ installServer() {
 
     # Provide necessary output or exit depending on version of Java found
     case $mainVersion in
-      8)
-        echo "You have the current version installed!"
-        echo "Hooray! This script will continue"
-        ;;
-      9)
-        echo "You have a newer than recommended version installed."
-        echo "Please consider downgrading to 8 as it is the recommended version of Java at this time."
-        echo "This script will continue but bear in mind that you are prone to run into issues."
-        ;;
-      [1-7])
-        echo "You need to upgrade to a more recent version of Java."
-        echo "Please install at least Java 8 and re-run this script."
-        exit 10
-        ;;
-      *)
-        echo "Something went wrong when getting the version of Java installed."
-        exit 3
-        ;;
+    8)
+      echo "You have the current version installed!"
+      echo "Hooray! This script will continue"
+      ;;
+    9)
+      echo "You have a newer than recommended version installed."
+      echo "Please consider downgrading to 8 as it is the recommended version of Java at this time."
+      echo "This script will continue but bear in mind that you are prone to run into issues."
+      ;;
+    [1-7])
+      echo "You need to upgrade to a more recent version of Java."
+      echo "Please install at least Java 8 and re-run this script."
+      exit 10
+      ;;
+    *)
+      echo "Something went wrong when getting the version of Java installed."
+      exit 3
+      ;;
     esac
-  elif [[ $checkJava -eq 1 ]];
-  then
+  elif [[ $checkJava -eq 1 ]]; then
     echo "Java is not installed. Will attempt to download and install OpenJDK"
     apt install -y openjdk-8-jre-headless tmux
     installJavaCode=$($?)
-    if [[ ${installJavaCode} -eq 0 ]];
-    then
+    if [[ ${installJavaCode} -eq 0 ]]; then
       echo "OpenJDK 8 JRE has been successfully installed."
     else
       echo "Something went wrong when installing 'openjdk-8-jre-headless'."
@@ -232,18 +225,18 @@ installServer() {
 
   versionFileURL="https://launchermeta.mojang.com/mc/game/version_manifest.json"
 
-  wget -qN  ${versionFileURL} -O /tmp/mcVersion.json
+  wget -qN ${versionFileURL} -O /tmp/mcVersion.json
   mcVersionMohjang=$(grep -oP "\"release\":\"\K\d{1,2}\.\d{1,2}\.\d{1,2}" /tmp/mcVersion.json)
   wget -N https://s3.amazonaws.com/Minecraft.Download/versions/${mcVersionMohjang}/minecraft_server.${mcVersionMohjang}.jar -O /tmp/minecraft_server.${mcVersionMohjang}.jar
 
   ### Copy server.jar to /opt/minecraft
   echo "Copy server.jar to /opt/minecraft"
 
-  cp  /tmp/minecraft_server.${mcVersionMohjang}.jar $installDir
+  cp /tmp/minecraft_server.${mcVersionMohjang}.jar $installDir
 
   ### Run Server once to generate some needed files
   #### Create eula.txt with true value
-  echo "eula=true" > /opt/minecraft/eula.txt
+  echo "eula=true" >/opt/minecraft/eula.txt
   ### Best to use Screen for this part
   tmuxSessionName=minecraftServer
   tmux new -ds ${tmuxSessionName}
@@ -254,40 +247,39 @@ installServer() {
   sleep 60
   echo "$(tput setaf 1)Stop server$(tput sgr0)"
   tmux send -t ${tmuxSessionName} "/stop" ENTER
-  if [[ "${serverType}" == "forge" ]];
-  then
-      ## Download & Install MC Forge
+  if [[ "${serverType}" == "forge" ]]; then
+    ## Download & Install MC Forge
 
-      ### Get latest versions
+    ### Get latest versions
 
-      #### TODO: Add option to install latest or recommended.
-      #### For now we will only install recommended for a more stable experience
-      echo "Getting MineCraft Forge server files..."
-      forgeInfoPage="/tmp/mcForgeInfo.html"
-      wget -qN https://files.minecraftforge.net  -O ${forgeInfoPage}
-      mcForgeRecommendedVersion=$(grep -Po "<small>\K\d{1,2}\.\d{1,2}\.\d{1,2} - \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,4}" ${forgeInfoPage} | tail -n 1 | sed 's/[[:space:]]//g')
+    #### TODO: Add option to install latest or recommended.
+    #### For now we will only install recommended for a more stable experience
+    echo "Getting MineCraft Forge server files..."
+    forgeInfoPage="/tmp/mcForgeInfo.html"
+    wget -qN https://files.minecraftforge.net -O ${forgeInfoPage}
+    mcForgeRecommendedVersion=$(grep -Po "<small>\K\d{1,2}\.\d{1,2}\.\d{1,2} - \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,4}" ${forgeInfoPage} | tail -n 1 | sed 's/[[:space:]]//g')
 
-      # echo "Current Recommended version is: ${latestForge}"
-      echo "Current Recommended version is: ${mcForgeRecommendedVersion}"
-      echo "Downloading now..."
-      ### Download recommended version
-      # comboVersion="${latestForge}"
-      comboVersion="${mcForgeRecommendedVersion}"
-      wget -qN http://files.minecraftforge.net/maven/net/minecraftforge/forge/${comboVersion}/forge-${comboVersion}-installer.jar -O ${installDir}forge-${comboVersion}-installer.jar
+    # echo "Current Recommended version is: ${latestForge}"
+    echo "Current Recommended version is: ${mcForgeRecommendedVersion}"
+    echo "Downloading now..."
+    ### Download recommended version
+    # comboVersion="${latestForge}"
+    comboVersion="${mcForgeRecommendedVersion}"
+    wget -qN http://files.minecraftforge.net/maven/net/minecraftforge/forge/${comboVersion}/forge-${comboVersion}-installer.jar -O ${installDir}forge-${comboVersion}-installer.jar
 
-      echo "Installing Forge..."
-      tmux send -t $tmuxSessionName 'java -Xms512M -Xmx512M -jar '${installDir}'forge-'${comboVersion}'-installer.jar --installServer' ENTER
+    echo "Installing Forge..."
+    tmux send -t $tmuxSessionName 'java -Xms512M -Xmx512M -jar '${installDir}'forge-'${comboVersion}'-installer.jar --installServer' ENTER
 
-      ### Downloading Universal Forge Filegg
-      wget -qN http://files.minecraftforge.net/maven/net/minecraftforge/forge/${comboVersion}/forge-${comboVersion}-universal.jar -O ${installDir}forge-${comboVersion}-universal.jar
+    ### Downloading Universal Forge Filegg
+    wget -qN http://files.minecraftforge.net/maven/net/minecraftforge/forge/${comboVersion}/forge-${comboVersion}-universal.jar -O ${installDir}forge-${comboVersion}-universal.jar
 
-      ### Run the Forge server once
-      tmux send -t $tmuxSessionName "java -Xms512M -Xmx512M -jar ${installDir}forge-${comboVersion}-universal.jar nogui"
-      echo "Wait while Forge runs for the first time."
-      sleep 60
-      echo "Turn off server."
-      tmux send -t ${tmuxSessionName} "/stop" ENTER
-      echo "End Forge Installation"
+    ### Run the Forge server once
+    tmux send -t $tmuxSessionName "java -Xms512M -Xmx512M -jar ${installDir}forge-${comboVersion}-universal.jar nogui"
+    echo "Wait while Forge runs for the first time."
+    sleep 60
+    echo "Turn off server."
+    tmux send -t ${tmuxSessionName} "/stop" ENTER
+    echo "End Forge Installation"
   fi
 
   echo "Making changes to the server.properties."
@@ -316,9 +308,8 @@ installServer() {
   tmux kill-session -t $tmuxSessionName
   echo "killed tmux"
 }
-removeMinecraft(){
-  if [[ -d ${installDir} ]];
-  then
+removeMinecraft() {
+  if [[ -d ${installDir} ]]; then
     echo "An installation exists."
     echo "Removing..."
     rm -rf ${installDir}
@@ -337,42 +328,39 @@ usage() {
 }
 
 case $action in
-  "startServer")
-    getLatestVersions
-    serverType="forge"
-    startServer
-    ;;
-  "stopServer")
-    stopServer
-    ;;
-  "backupServer")
-    getLatestVersions
-    backupServer
-    ;;
-  "installVanilla")
-    getLatestVersions
-    serverType="vanilla"
-    installServer
-    ;;
-  "install"| "installForge")
-    getLatestVersions
-    serverType="forge"
-    installServer
-    ;;
-  "getVersions")
-    getLatestVersions
-    ;;
-  "cleanupScript"|  "uninstall"|  "remove")
-    removeMinecraft
-    ;;
-  *)
-    echo "Action not recognized."
-    usage
-    ;;
+"startServer")
+  getLatestVersions
+  serverType="forge"
+  startServer
+  ;;
+"stopServer")
+  stopServer
+  ;;
+"backupServer")
+  getLatestVersions
+  backupServer
+  ;;
+"installVanilla")
+  getLatestVersions
+  serverType="vanilla"
+  installServer
+  ;;
+"install" | "installForge")
+  getLatestVersions
+  serverType="forge"
+  installServer
+  ;;
+"getVersions")
+  getLatestVersions
+  ;;
+"cleanupScript" | "uninstall" | "remove")
+  removeMinecraft
+  ;;
+*)
+  echo "Action not recognized."
+  usage
+  ;;
 esac
-
-
-
 
 # Stop MC Server
 
