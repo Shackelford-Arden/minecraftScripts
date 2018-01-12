@@ -2,16 +2,80 @@
 
 ## Compile all existing functionality into once script that uses functions
 
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -n|--servername|--name)
+    serverName="$2"
+    minecraftServer="$serverName"
+    installDir="/opt/$serverName"
+    ;;
+    -v|--mcversion)
+    vanillaVersion="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -f|--forgeversion)
+    forgeVersion="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -b|--backupdir)
+    backupDir="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -t|--servertype)
+    serverType="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --xms|-xms)
+    Xms="$2"
+    ;;
+    --xmx|-xmx)
+    Xmx="$2"
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+echo "Number files in SEARCH PATH with EXTENSION:" $(ls -1 "${SEARCHPATH}"/*."${EXTENSION}" | wc -l)
+if [[ -n $1 ]]; then
+    echo "Last line of file specified as non-opt/last argument:"
+    tail -1 "$1"
+fi
+
+
+
+
+
+
+
 action=$1
 serverProperties="./serverInfo.properties"
-serverVersions="./versions.txt"
-installDir=$(grep -oP "installDir=\K.*" ${serverProperties})
-Xms=$(grep -oP "minMem=\K.*" ${serverProperties})
-Xmx=$(grep -oP "maxMem=\K.*" ${serverProperties})
-vanillaVersion=$(grep -oP "vanillaVersion=\K.*" ${serverProperties})
-forgeVersion=$(grep -oP "forgeVersion=\K.*" ${serverProperties})
-backupDir=$(grep -oP "backupDir=\K.*" ${serverProperties})
+# serverVersions="./versions.txt"
+if [ -z "$minecraftServer" -a "${minecraftServer+xxx}" = "xxx" ]; then minecraftServer="minecraftServer";                                     fi
+if [ -z "$installDir"     -a "${installDir+xxx}" = "xxx"      ]; then installDir=$(grep -oP "installDir=\K.*" ${serverProperties});         fi
+if [ -z "$Xms"            -a "${Xms+xxx}" = "xxx"             ]; then Xms=$(grep -oP "minMem=\K.*" ${serverProperties});                    fi
+if [ -z "$Xmx"            -a "${Xmx+xxx}" = "xxx"             ]; then Xmx=$(grep -oP "maxMem=\K.*" ${serverProperties});                    fi
+if [ -z "$vanillaVersion" -a "${vanillaVersion+xxx}" = "xxx"  ]; then vanillaVersion=$(grep -oP "vanillaVersion=\K.*" ${serverProperties}); fi
+if [ -z "$forgeVersion"   -a "${forgeVersion+xxx}" = "xxx"    ]; then forgeVersion=$(grep -oP "forgeVersion=\K.*" ${serverProperties});     fi
+if [ -z "$backupDir"      -a "${backupDir+xxx}" = "xxx"       ]; then backupDir=$(grep -oP "backupDir=\K.*" ${serverProperties});           fi
+if [ -z "$serverType"      -a "${serverType+xxx}" = "xxx"       ]; then serverType="forge";           fi
 
+# if versions aren't supplied in CLA or serverProperties, get reccomended versions.
+if [ -z "$vanillaVersion" -a "${vanillaVersion+xxx}" = "xxx"  ]; then vanillaVersion=getReccomendedVanilla; fi
+if [ -z "$forgeVersion"   -a "${forgeVersion+xxx}" = "xxx"    ]; then forgeVersion=getReccomendedForge;     fi
+if [ -z "$Xms"            -a "${Xms+xxx}" = "xxx"             ]; then Xms=1G;                               fi
+if [ -z "$Xmx"            -a "${Xmx+xxx}" = "xxx"             ]; then Xmx=1G;                               fi
 # Start MC Server
 
 backupServer() {
@@ -53,15 +117,43 @@ backupServer() {
   echo "Backup name = $completeBackup"
   echo "Backup Complete!"
 }
+getReccomendedVanilla(){
+  # TODO: use version_manifest.json
+          # versionFileURL="https://launchermeta.mojang.com/mc/game/version_manifest.json"
+
+          # wget -qN ${versionFileURL} -O /tmp/mcVersion.json
+          # mcVersionMohjang=$(grep -oP "\"release\":\"\K\d{1,2}\.\d{1,2}\.\d{1,2}" /tmp/mcVersion.json)
+          # wget -N https://s3.amazonaws.com/Minecraft.Download/versions/${mcVersionMohjang}/minecraft_server.${mcVersionMohjang}.jar -O /tmp/minecraft_server.${mcVersionMohjang}.jar
+
+  # Check Vanilla Server Version
+  vanillaManifest="https://launchermeta.mojang.com/mc/game/version_manifest.json"
+  wget -qN ${vanillaManifest} -O /tmp/vanillaMCVersion.json
+  localVanillaVersion=$(grep -oP "\"release\":\"\K\d{1,2}\.\d{1,2}\.\d{1,2}" /tmp/vanillaMCVersion.json)
+  # Add version to serverInfo.properties
+  # sed -i "s/(vanillaVersion=).*/${localVanillaVersion}/" ${serverVersions}
+  # echo "Vanilla Version: ${localVanillaVersion}"
+  # echo "Vanilla Versions: ${serverVersions}"
+  return "$localVanillaVersion";
+}
+getReccomendedForge(){
+  # Check Forge Version
+  echo "Getting MineCraft Forge server files..."
+  forgeManifest="/tmp/forgeManifest.html"
+  wget -qN https://files.minecraftforge.net -O ${forgeManifest}
+  echo "Find Reccomended version"
+  # Find Recommended Version
+  localrecommendedForge=$(grep -A1 "Download Recommended" ${forgeManifest} | grep -oP "<small>\K\d{1,2}\.\d{1,2}\.\d{1,2} - \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,4}" | sed 's/[[:space:]]//g')
+  return "$localrecommendedForge";
+}
 getLatestVersions() {
 
   # Check Vanilla Server Version
   vanillaManifest="https://launchermeta.mojang.com/mc/game/version_manifest.json"
   wget -qN ${vanillaManifest} -O /tmp/vanillaMCVersion.json
-  vanillaVersion=$(grep -oP "\"release\":\"\K\d{1,2}\.\d{1,2}\.\d{1,2}" /tmp/vanillaMCVersion.json)
+  localVanillaVersion=$(grep -oP "\"release\":\"\K\d{1,2}\.\d{1,2}\.\d{1,2}" /tmp/vanillaMCVersion.json)
   # Add version to serverInfo.properties
-  sed -i "s/(vanillaVersion=).*/${vanillaVersion}/" ${serverVersions}
-  echo "Vanilla Version: ${vanillaVersion}"
+  sed -i "s/(vanillaVersion=).*/${localVanillaVersion}/" ${serverVersions}
+  echo "Vanilla Version: ${localVanillaVersion}"
   echo "Vanilla Versions: ${serverVersions}"
 
   # Check Forge Version
@@ -88,16 +180,16 @@ getLatestVersions() {
 startServer() {
   echo "starting 'startServer()'"
   # Let's start the Server
-  tmux new -ds minecraftServer
-  tmux send -t minecraftServer 'cd '${installDir} ENTER
+  tmux new -ds $minecraftServer
+  tmux send -t $minecraftServer 'cd '${installDir} ENTER
   echo "Starting ${serverType} server..."
   case $serverType in
   "vanilla")
     echo "Inside vanilla exeution"
     echo "starting ${installDir}minecraft_server.${vanillaVersion}.jar."
     if [[ -f ${installDir}minecraft_server.${vanillaVersion}.jar ]]; then
-      # tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'minecraft_server.*.jar nogui' ENTER
-      tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'minecraft_server.'${vanillaVersion}'.jar nogui' ENTER
+      # tmux send -t $minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'minecraft_server.*.jar nogui' ENTER
+      tmux send -t $minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'minecraft_server.'${vanillaVersion}'.jar nogui' ENTER
     else
       echo "Failed to start server; ${installDir}minecraft_server.${vanillaVersion}.jar could not be found."
       echo "Please look into this and try again."
@@ -106,12 +198,12 @@ startServer() {
     ;;
   "forge")
     echo "Inside forge exeution"
-    echo "Starting ${installDir}forge-${recommendedForge}-universal.jar."
-    if [[ -f "${installDir}forge-${recommendedForge}-universal.jar" ]]; then
+    echo "Starting ${installDir}forge-${forgeVersion}-universal.jar."
+    if [[ -f "${installDir}forge-${forgeVersion}-universal.jar" ]]; then
       # tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'forge-*-universal.jar nogui' ENTER
-      tmux send -t minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'forge-'${recommendedForge}'-universal.jar nogui' ENTER
+      tmux send -t $minecraftServer 'java -Xms'${Xms}' -Xms'${Xmx}' -jar '${installDir}'forge-'${forgeVersion}'-universal.jar nogui' ENTER
     else
-      echo "Failed to start server; ${installDir}forge-${recommendedForge}-universal.jar could not be found."
+      echo "Failed to start server; ${installDir}forge-${forgeVersion}-universal.jar could not be found."
       echo "Please look into this and try again."
       exit 1
     fi
@@ -124,7 +216,7 @@ startServer() {
   echo "Ending startServer() function"
 }
 stopServer() {
-  tmux send -t minecraftServer '/stop' ENTER
+  tmux send -t $minecraftServer '/stop' ENTER
 }
 installServer() {
   ## TODO Add support for other popular distros (Fedora, CentOS, Arch, etc)
@@ -143,7 +235,8 @@ installServer() {
   echo "set installation dir"
   ### Set Installation Directory to default if not found in serverProperties
   if [[ -z ${installDir} ]]; then
-    installDir="/opt/minecraft/"
+    echo "Setting installDir to default /opt/<serverName>/"
+    installDir="/opt/$serverName/"
   fi
   ### Create Installation directory if it doesn't exist
   if [[ -d ${installDir} ]]; then
@@ -160,10 +253,10 @@ installServer() {
     fi
   fi
 
-  echo "Adding serverInfo.properties files to ${installDir}"
-  cp ./serverInfo.properties ${installDir}
-  echo "Adding versions.txt to ${installDir}"
-  cp ./versions.txt ${installDir}
+  # echo "Adding serverInfo.properties files to ${installDir}"
+  # cp ./serverInfo.properties ${installDir}
+  # echo "Adding versions.txt to ${installDir}"
+  # cp ./versions.txt ${installDir}
 
   # Set installation of Forge to true or false
   echo "Checking dependencies..."
@@ -223,22 +316,22 @@ installServer() {
   #### IF local version = current version
   ## Get latest version of MC Server
 
-  versionFileURL="https://launchermeta.mojang.com/mc/game/version_manifest.json"
+  # versionFileURL="https://launchermeta.mojang.com/mc/game/version_manifest.json"
 
-  wget -qN ${versionFileURL} -O /tmp/mcVersion.json
-  mcVersionMohjang=$(grep -oP "\"release\":\"\K\d{1,2}\.\d{1,2}\.\d{1,2}" /tmp/mcVersion.json)
-  wget -N https://s3.amazonaws.com/Minecraft.Download/versions/${mcVersionMohjang}/minecraft_server.${mcVersionMohjang}.jar -O /tmp/minecraft_server.${mcVersionMohjang}.jar
+  # wget -qN ${versionFileURL} -O /tmp/mcVersion.json
+  # mcVersionMohjang=$(grep -oP "\"release\":\"\K\d{1,2}\.\d{1,2}\.\d{1,2}" /tmp/mcVersion.json)
+  wget -N https://s3.amazonaws.com/Minecraft.Download/versions/${vanillaVersion}/minecraft_server.${vanillaVersion}.jar -O /tmp/minecraft_server.${vanillaVersion}.jar
 
   ### Copy server.jar to /opt/minecraft
   echo "Copy server.jar to /opt/minecraft"
 
-  cp /tmp/minecraft_server.${mcVersionMohjang}.jar $installDir
+  cp /tmp/minecraft_server.${vanillaVersion}.jar $installDir
 
   ### Run Server once to generate some needed files
   #### Create eula.txt with true value
-  echo "eula=true" >/opt/minecraft/eula.txt
+  echo "eula=true" > "$installDir/eula.txt"
   ### Best to use Screen for this part
-  tmuxSessionName=minecraftServer
+  tmuxSessionName=$minecraftServer
   tmux new -ds ${tmuxSessionName}
   tmux send -t $tmuxSessionName 'cd '$installDir ENTER
   tmux send -t $tmuxSessionName 'java -jar ./minecraft_server.'${mcVersionMohjang}'.jar -Xms512M -Xmx512M nogui' ENTER
@@ -255,16 +348,16 @@ installServer() {
     #### TODO: Add option to install latest or recommended.
     #### For now we will only install recommended for a more stable experience
     echo "Getting MineCraft Forge server files..."
-    forgeInfoPage="/tmp/mcForgeInfo.html"
-    wget -qN https://files.minecraftforge.net -O ${forgeInfoPage}
-    mcForgeRecommendedVersion=$(grep -Po "<small>\K\d{1,2}\.\d{1,2}\.\d{1,2} - \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,4}" ${forgeInfoPage} | tail -n 1 | sed 's/[[:space:]]//g')
+            # forgeInfoPage="/tmp/mcForgeInfo.html"
+            # wget -qN https://files.minecraftforge.net -O ${forgeInfoPage}
+            # mcForgeRecommendedVersion=$(grep -Po "<small>\K\d{1,2}\.\d{1,2}\.\d{1,2} - \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,4}" ${forgeInfoPage} | tail -n 1 | sed 's/[[:space:]]//g')
 
     # echo "Current Recommended version is: ${latestForge}"
-    echo "Current Recommended version is: ${mcForgeRecommendedVersion}"
+    echo "Current Recommended version is: ${forgeVersion}"
     echo "Downloading now..."
     ### Download recommended version
     # comboVersion="${latestForge}"
-    comboVersion="${mcForgeRecommendedVersion}"
+    comboVersion="${forgeVersion}"
     wget -qN http://files.minecraftforge.net/maven/net/minecraftforge/forge/${comboVersion}/forge-${comboVersion}-installer.jar -O ${installDir}forge-${comboVersion}-installer.jar
 
     echo "Installing Forge..."
@@ -318,6 +411,7 @@ removeMinecraft() {
     find /tmp -iname "*forge*.jar" -delete
     find /tmp -iname "*minecraft*.jar" -delete
     rm /tmp/mcVersion.json
+    echo "installation Removed"
   else
     echo "${installDir} Doesn't exist. Nothing to remove."
     echo "Nothing else to see here... move along..."
@@ -329,15 +423,15 @@ usage() {
 
 case $action in
 "startServer")
-  getLatestVersions
-  serverType="forge"
+  # getLatestVersions
+  # serverType="forge"
   startServer
   ;;
 "stopServer")
   stopServer
   ;;
 "backupServer")
-  getLatestVersions
+  # getLatestVersions
   backupServer
   ;;
 "installVanilla")
@@ -347,7 +441,7 @@ case $action in
   ;;
 "install" | "installForge")
   getLatestVersions
-  serverType="forge"
+  # serverType="forge"
   installServer
   ;;
 "getVersions")
