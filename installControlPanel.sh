@@ -9,8 +9,59 @@
 # Error Codes
 # 1: This script was unable to create the installation directory. Likely due to permissions
 
-echo "Currently a work in progress. This script is not ready to be run."
-exit 20
+currUser=$EUID
+  if [[ ! ${currUser} -eq 0 ]];
+  then
+    echo "Please run this script as root."
+    exit 20
+  fi
+
+installNodeJs(){
+  echo "Downloading Installer file"
+  checkCurl=$(which node &>/dev/null ; echo $?)
+  if [[ $checkCurl -eq 1 ]]
+  then
+    apt-get install curl -y
+  fi
+  curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+  sudo apt-get install nodejs -y
+}
+
+echo "Checking for node and npm"
+checkNode=$(which node &>/dev/null ; echo $?)
+if [[ $checkNode -eq 0 ]]
+then
+  echo "node is installed"
+  checkNpm=$(which npm &>/dev/null ; echo $?)
+  if [[ $checkNpm -eq 0 ]]
+  then
+    echo "npm is installed too. that's great."
+  elif [[ $checkNpm -eq 1 ]]
+  then
+    echo "npm isn't installed, but node is. installing fresh"
+    installNodeJs
+  fi
+elif [[ $checkNode -eq 1 ]]
+then
+  echo "node isn't installed"
+  installNodeJs
+fi
+
+cd "$( dirname "$0" )"
+cd "./controlPanel/node_server"
+npm install
+
+
+
+
+
+
+
+
+
+
+echo "Currently a work in progress. The rest to setup apache/Ngnix for multiple servers is to be done later."
+exit 0
 
 if [[ "${EUID}" -gt 0 ]];then
   echo "Please run this script as root."
