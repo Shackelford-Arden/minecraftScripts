@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 ## Compile all existing functionality into once script that uses functions
-
+echo "opening minecraftCommands.sh"
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
 key="$1"
-
+echo "current param is $key";
 case $key in
     -n|--servername|--name)
     serverName="$2"
@@ -47,11 +47,11 @@ esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-echo "Number files in SEARCH PATH with EXTENSION:" $(ls -1 "${SEARCHPATH}"/*."${EXTENSION}" | wc -l)
-if [[ -n $1 ]]; then
-    echo "Last line of file specified as non-opt/last argument:"
-    tail -1 "$1"
-fi
+# echo "Number files in SEARCH PATH with EXTENSION:" $(ls -1 "${SEARCHPATH}"/*."${EXTENSION}" | wc -l)
+# if [[ -n $1 ]]; then
+#     echo "Last line of file specified as non-opt/last argument:"
+#     tail -1 "$1"
+# fi
 
 
 
@@ -62,21 +62,41 @@ fi
 action=$1
 serverProperties="./serverInfo.properties"
 # serverVersions="./versions.txt"
-if [ -z "$minecraftServer" -a "${minecraftServer+xxx}" = "xxx" ]; then minecraftServer="minecraftServer";                                     fi
-if [ -z "$installDir"     -a "${installDir+xxx}" = "xxx"      ]; then installDir=$(grep -oP "installDir=\K.*" ${serverProperties});         fi
-if [ -z "$Xms"            -a "${Xms+xxx}" = "xxx"             ]; then Xms=$(grep -oP "minMem=\K.*" ${serverProperties});                    fi
-if [ -z "$Xmx"            -a "${Xmx+xxx}" = "xxx"             ]; then Xmx=$(grep -oP "maxMem=\K.*" ${serverProperties});                    fi
-if [ -z "$vanillaVersion" -a "${vanillaVersion+xxx}" = "xxx"  ]; then vanillaVersion=$(grep -oP "vanillaVersion=\K.*" ${serverProperties}); fi
-if [ -z "$forgeVersion"   -a "${forgeVersion+xxx}" = "xxx"    ]; then forgeVersion=$(grep -oP "forgeVersion=\K.*" ${serverProperties});     fi
-if [ -z "$backupDir"      -a "${backupDir+xxx}" = "xxx"       ]; then backupDir=$(grep -oP "backupDir=\K.*" ${serverProperties});           fi
-if [ -z "$serverType"      -a "${serverType+xxx}" = "xxx"       ]; then serverType="forge";           fi
+if [ -z "$minecraftServer"]; then minecraftServer="minecraftServer";                                    fi
+if [ -z "$installDir"     ]; then installDir=$(grep -oP "installDir=\K.*" ${serverProperties});         fi
+if [ -z "$Xms"            ]; then Xms=$(grep -oP "minMem=\K.*" ${serverProperties});                    fi
+if [ -z "$Xmx"            ]; then Xmx=$(grep -oP "maxMem=\K.*" ${serverProperties});                    fi
+if [ -z "$vanillaVersion" ]; then vanillaVersion=$(grep -oP "vanillaVersion=\K.*" ${serverProperties}); fi
+if [ -z "$forgeVersion"   ]; then forgeVersion=$(grep -oP "forgeVersion=\K.*" ${serverProperties});     fi
+if [ -z "$backupDir"      ]; then backupDir=$(grep -oP "backupDir=\K.*" ${serverProperties});           fi
+if [ -z "$serverType"     ]; then serverType="forge";           fi
 
 # if versions aren't supplied in CLA or serverProperties, get reccomended versions.
-if [ -z "$vanillaVersion" -a "${vanillaVersion+xxx}" = "xxx"  ]; then vanillaVersion=getReccomendedVanilla; fi
-if [ -z "$forgeVersion"   -a "${forgeVersion+xxx}" = "xxx"    ]; then forgeVersion=getReccomendedForge;     fi
-if [ -z "$Xms"            -a "${Xms+xxx}" = "xxx"             ]; then Xms=1G;                               fi
-if [ -z "$Xmx"            -a "${Xmx+xxx}" = "xxx"             ]; then Xmx=1G;                               fi
+if [ -z "$vanillaVersion" ]; then vanillaVersion=getReccomendedVanilla; fi
+if [ -z "$forgeVersion"   ]; then forgeVersion=getReccomendedForge;     fi
+if [ -z "$installDir"     ]; then installDir="/opt/$minecraftServer";   fi
+if [ -z "$Xms"            ]; then Xms=1G;                               fi
+if [ -z "$Xmx"            ]; then Xmx=1G;                               fi
 # Start MC Server
+
+
+
+echo "Show values for each of these"
+echo "............................."
+echo "minecraftServer:  $minecraftServer"
+echo "installDir:       $installDir"
+echo "Xms:              $Xms"
+echo "Xmx:              $Xmx"
+echo "vanillaVersion:   $vanillaVersion"
+echo "forgeVersion:     $forgeVersion"
+echo "backupDir:        $backupDir"
+echo "serverType:       $serverType"
+echo "Action:           $action"
+
+
+
+
+
 
 backupServer() {
 
@@ -451,11 +471,7 @@ case $action in
   removeMinecraft
   ;;
 *)
-  echo "Action not recognized."
+  echo "Action ($action) not recognized."
   usage
   ;;
 esac
-
-# Stop MC Server
-
-# Backup MC Server
