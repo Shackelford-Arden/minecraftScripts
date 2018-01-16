@@ -24,7 +24,8 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var util = require('util');
-var exec = require('child_process').exec;
+var cp = require('child_process');
+var exec = cp.exec;
 //include the modules for our server functions
 var command = require('./consoleCommands');
 
