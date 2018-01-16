@@ -25,7 +25,9 @@
       console.log("startingServer")
       socket.emit("startServer");
     }
-    
+    function editServer(){
+        console.log("Gonna edit something")
+    }
     function stopServer(){
         console.log("stopingServer")
         socket.emit("stopServer");
@@ -84,10 +86,40 @@
                 <div class="card-content white-text">
                     <span class="card-title"><h3>The Beginning and End...</h3></span>
                     <p>Go ahead... click one... you know you want to.</p>
-                    <a class="waves-effect waves-light btn" onclick="startServer()">Start Server</a>
-                    <a class="waves-effect waves-light btn" onclick="stopServer()">Stop Server</a></br></br>
-                    <a class="waves-effect waves-light btn" onclick="uninstallServer()">Uninstall Server</a>
-                    <a class="waves-effect waves-light btn" onclick="installServer()">Install Forge Server</a>
+                    <table id="serverTable" class="highlight">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Port</th>
+                                <th>Status</th>
+                                <th>Start Server</th>
+                                <th>Stop Server</th>
+                                <!-- <th>Edit Server</th> -->
+                                <th><button class="waves-effect waves-light btn">+</button></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Minecraft Server</td>
+                                <td>generic server</td>
+                                <td>default</td>
+                                <td>Unknown</td>
+                                <td>
+                                    <a class="waves-effect waves-light btn" onclick="startServer()">Start Server</a>
+                                </td>
+                                <td>
+                                    <a class="waves-effect waves-light btn" onclick="stopServer()">Stop Server</a>
+                                </td>
+                                <!-- <td>
+                                    <a class="waves-effect waves-light btn" onclick="editServer()">Edit Server</a>
+                                </td> -->
+                                <td>thing</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- <a class="waves-effect waves-light btn" onclick="uninstallServer()">Uninstall Server</a> -->
+                    <!-- <a class="waves-effect waves-light btn" onclick="installServer()">Install Forge Server</a> -->
                 </div>
             </div>
 
