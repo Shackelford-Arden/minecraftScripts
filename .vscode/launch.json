@@ -6,24 +6,24 @@
    "configurations": [
 
       {
-         "name": "(gdb) Launch",
+         "name": "WebServerLaunch",
          "type": "cppdbg",
          "request": "launch",
-         "program": "${workspaceFolder}/test.sh",
-         "args": [],
+         "program": "c:\\Program Files\\nodejs\\node.exe",
+         "args": ["server.js"],
          "stopAtEntry": false,
-         "cwd": "${workspaceFolder}",
+         "cwd": "${workspaceFolder}/controlPanel/node_server",
          "environment": [],
          "externalConsole": true,
          "MIMode": "gdb",
-         "miDebuggerPath": "C:/msys64/mingw64/bin/gdb.exe",
-         "setupCommands": [
-            {
-               "description": "Enable pretty-printing for gdb",
-               "text": "-enable-pretty-printing",
-               "ignoreFailures": true
-            }
-         ],
+        //  "miDebuggerPath": "C:/msys64/mingw64/bin/gdb.exe",
+        //  "setupCommands": [
+        //     {
+        //        "description": "Enable pretty-printing for gdb",
+        //        "text": "-enable-pretty-printing",
+        //        "ignoreFailures": true
+        //     }
+        //  ],
         //  "preLaunchTask": "buildCpp",
          "internalConsoleOptions": "openOnFirstSessionStart"
       }
