@@ -1,0 +1,30 @@
+.collapsible{
+   border: none;
+}
+.collapsible .collapsible-header{
+   display: flex;
+   flex-flow: row nowrap;
+   align-items: center;
+   justify-content: space-around;
+   color: black;
+   font-weight: 400;
+   background: #d2d2d2;
+   border-bottom:1px solid  #969696;
+}
+.collapsible-header .spacer{
+   flex-grow: 10;
+}
+.collapsible-header .serverStatus{
+   
+}.collapsible-header .stopServer,.collapsible-header .startServer{
+   flex-shrink: 0;
+   flex-grow: 0;
+   padding: 0 5px;
+}
+.collapsible-header .serverName{
+   flex-shrink: 0;
+   flex-grow: 3;
+}
+.collapsible .collapsible-body {
+   border-bottom: 1px solid  #969696;
+}

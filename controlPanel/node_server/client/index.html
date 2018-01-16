@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <title>Project Blocky</title>
     <link rel="stylesheet" type="text/css" href="materialize/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="styles/terminal.css">
+    <link rel="stylesheet" type="text/css" href="styles/main.css">
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <!-- <script src="node_modules/socket.io-client/dist/socket.io.js"></script> -->
     <script src="/socket.io/socket.io.js"></script>
@@ -86,38 +88,81 @@
                 <div class="card-content white-text">
                     <span class="card-title"><h3>The Beginning and End...</h3></span>
                     <p>Go ahead... click one... you know you want to.</p>
-                    <table id="serverTable" class="highlight">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Port</th>
-                                <th>Status</th>
-                                <th>Start Server</th>
-                                <th>Stop Server</th>
-                                <!-- <th>Edit Server</th> -->
-                                <th><button class="waves-effect waves-light btn">+</button></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Minecraft Server</td>
-                                <td>generic server</td>
-                                <td>default</td>
-                                <td>Unknown</td>
-                                <td>
-                                    <a class="waves-effect waves-light btn" onclick="startServer()">Start Server</a>
-                                </td>
-                                <td>
-                                    <a class="waves-effect waves-light btn" onclick="stopServer()">Stop Server</a>
-                                </td>
-                                <!-- <td>
-                                    <a class="waves-effect waves-light btn" onclick="editServer()">Edit Server</a>
-                                </td> -->
-                                <td>thing</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <ul class="collapsible" data-collapsible="expandable">
+                            <li>
+                                <div class="collapsible-header">
+                                    <!-- Minecraft Server -->
+                                    <div class="serverName">MinecraftServer</div>
+                                    <div class="serverStatus"></div>
+                                    <div class="spacer"></div>
+                                    <div class="startServer"><a class="waves-effect waves-light btn" onclick="startServer()">Start Server</a></div>
+                                    <div class="stopServer"><a class="waves-effect waves-light btn" onclick="stopServer()">Stop Server</a></div>
+                                </div>
+                                <div class="collapsible-body">
+                                    <div class="terminal space shadow">
+                                            <div class="top">
+                                                <div class="btns">
+                                                    <span class="circle red"></span>
+                                                    <span class="circle yellow"></span>
+                                                    <span class="circle green"></span>
+                                                </div>
+                                                <div class="title">Minecraft Server</div>
+                                            </div>
+                                            <pre class="body">
+    commands
+                                            </pre>
+                                        </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="collapsible-header">
+                                    <!-- Minecraft Server -->
+                                    <div class="serverName">MinecraftServer</div>
+                                    <div class="serverStatus"></div>
+                                    <div class="startServer"><a class="waves-effect waves-light btn" onclick="startServer()">Start Server</a></div>
+                                    <div class="stopServer"><a class="waves-effect waves-light btn" onclick="stopServer()">Stop Server</a></div>
+                                </div>
+                                <div class="collapsible-body">
+                                    <div class="terminal space shadow">
+                                            <div class="top">
+                                                <div class="btns">
+                                                    <span class="circle red"></span>
+                                                    <span class="circle yellow"></span>
+                                                    <span class="circle green"></span>
+                                                </div>
+                                                <div class="title">Minecraft Server</div>
+                                            </div>
+                                            <pre class="body">
+    commands
+                                            </pre>
+                                        </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="collapsible-header">
+                                    <!-- Minecraft Server -->
+                                    <div class="serverName">MinecraftServer</div>
+                                    <div class="serverStatus"></div>
+                                    <div class="startServer"><a class="waves-effect waves-light btn" onclick="startServer()">Start Server</a></div>
+                                    <div class="stopServer"><a class="waves-effect waves-light btn" onclick="stopServer()">Stop Server</a></div>
+                                </div>
+                                <div class="collapsible-body">
+                                    <div class="terminal space shadow">
+                                            <div class="top">
+                                                <div class="btns">
+                                                    <span class="circle red"></span>
+                                                    <span class="circle yellow"></span>
+                                                    <span class="circle green"></span>
+                                                </div>
+                                                <div class="title">Minecraft Server</div>
+                                            </div>
+                                            <pre class="body">
+    commands
+                                            </pre>
+                                        </div>
+                                </div>
+                            </li>
+                    </ul>
                     <!-- <a class="waves-effect waves-light btn" onclick="uninstallServer()">Uninstall Server</a> -->
                     <!-- <a class="waves-effect waves-light btn" onclick="installServer()">Install Forge Server</a> -->
                 </div>
