@@ -65,7 +65,7 @@ io.listen(server).on('connection', (socket)=>{
         }
         
         // servers[SN]=spawn('java',  ['-jar','craftbukkit.jar'],  {cwd:"C:/opt/minecraft/server1", stdio:['pipe',1,1] })
-        runningServers[SN]=spawn('java',  ['-jar',servers[SN].jar],  {cwd:"C:/opt/minecraft/server1", stdio:['pipe',1,1] })
+        runningServers[SN]=spawn('java',  ['-jar',servers[SN].jar],  {cwd:servers[SN].cwd, stdio:['pipe',1,1] })
     })
     socket.on("stopServer",(data)=>{
         if(data){
