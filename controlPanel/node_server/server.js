@@ -19,6 +19,7 @@
 **************************************************************/
 
 // set up needed modules
+const PORT = 8080;
 var express = require('express')
 var app = express();
 var server = require('http').Server(app);
@@ -26,6 +27,16 @@ var io = require('socket.io')(server);
 var util = require('util');
 var cp = require('child_process');
 var exec = cp.exec;
+var spawn = cp.spawn;
+var runningServers = {}
+var servers = {
+    minecraftServer:{
+        cwd:"C:/opt/minecraft/server1",
+        jar:'craftbukkit.jar',
+        maxRam:'-Xmx1G',
+        minRam:'-Xms512M'
+    }
+}
 //include the modules for our server functions
 var command = require('./consoleCommands');
 
@@ -36,32 +47,40 @@ var puts = function (error, stdout, stderr) {
 };
 
 //create the server and start listening on the defined port
-const PORT = 8080;
 // var server = http.createServer();
 server.listen(PORT);
 console.log("Listening for a connection...");
 //recieves the connection from the client and passes in a socket
-io.listen(server).on('connection', function(socket){
+io.listen(server).on('connection', (socket)=>{
 
     //log that we are connected
     console.log("The server and client are connected");
     socket.emit("connected");
     //listen for what method to call
-    socket.on("startServer",()=>{
-        exec("cd ../..; ./minecraftCommands.sh startServer",puts)
-        console.log("Started Server")
+    socket.on("startServer",(data)=>{
+        if(data){
+            var SN = data.name | 'minecraftServer'
+        }else{
+            var SN = 'minecraftServer'
+        }
+        
+        // servers[SN]=spawn('java',  ['-jar','craftbukkit.jar'],  {cwd:"C:/opt/minecraft/server1", stdio:['pipe',1,1] })
+        runningServers[SN]=spawn('java',  ['-jar',servers[SN].jar],  {cwd:"C:/opt/minecraft/server1", stdio:['pipe',1,1] })
     })
-    socket.on("stopServer",()=>{
-        exec("cd ../..; ./minecraftCommands.sh stopServer",puts)
-        console.log("Stoped Server")
+    socket.on("stopServer",(data)=>{
+        if(data){
+            var SN = data.name | 'minecraftServer'
+        }else{
+            var SN = 'minecraftServer'
+        }
+        runningServers[SN].stdin.write("stop\n")
     })
     socket.on("uninstallServer",()=>{
         exec("cd ../..; ./minecraftCommands.sh uninstall",puts)
-        console.log("Stoped Server")
     })
     socket.on("installServer",()=>{
         exec("cd ../..; ./minecraftCommands.sh installForge",puts)
-        console.log("Stoped Server")
+        // console.log("Stoped Server")
     })
 // I would like to use these, but module.exports aren't working right with exec()
     // socket.on("startServer",        command.startServer);
