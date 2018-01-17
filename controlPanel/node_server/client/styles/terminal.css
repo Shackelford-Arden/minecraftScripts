@@ -2,6 +2,7 @@
 .terminal {
     border-radius: 5px 5px 0 0;
     position: relative;
+
 }
 .terminal .top {
     background: #E8E6E8;
@@ -35,6 +36,10 @@
     color: #7AFB4C;
     padding: 8px;
     overflow: auto;
+    font-size: 10px;
+    line-height: 10px;
+    max-height: 400px;
+    min-height: 100px;
 }
 .space {
     margin: 25px;

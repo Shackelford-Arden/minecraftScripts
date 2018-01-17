@@ -14,7 +14,7 @@
 **************************************************************
 *  Change Date      Name            Description
 *  =============    ===========     ==========================
-*  08/05/17         Weston Clark    Initial Creation
+*  01/17/18         Cody Nichols    Changed A Lot...
 *
 **************************************************************/
 
@@ -31,10 +31,20 @@ var spawn = cp.spawn;
 var runningServers = {}
 var servers = {
     minecraftServer:{
-        cwd:"C:/opt/minecraft/server1",
+        cwd:"/opt/minecraft/server1",
+        name:"minecraftServer",
         jar:'craftbukkit.jar',
         maxRam:'-Xmx1G',
-        minRam:'-Xms512M'
+        minRam:'-Xms512M',
+        log:[]
+    },
+    bukkit:{
+        cwd:"C:/opt/minecraft/server2",
+        name:"bukkit",
+        jar:'craftbukkit.jar',
+        maxRam:'-Xmx1G',
+        minRam:'-Xms512M',
+        log:[]
     }
 }
 //include the modules for our server functions
@@ -56,26 +66,79 @@ io.listen(server).on('connection', (socket)=>{
     //log that we are connected
     console.log("The server and client are connected");
     socket.emit("connected");
+    socket.emit("servers",servers)
     //listen for what method to call
     socket.on("startServer",(data)=>{
         if(data){
-            var SN = data.name | 'minecraftServer'
+            var SN = data.name
         }else{
             var SN = 'minecraftServer'
         }
-        
+        if(runningServers[SN] && runningServers[SN].connected){
+            var newData = {
+                name:SN,
+                log:SN+" Server is already running\n"
+            }
+            console.log(newData)
+            socket.emit("stdOut",newData)
+            servers[SN].log.push(newData.log);
+        }
         // servers[SN]=spawn('java',  ['-jar','craftbukkit.jar'],  {cwd:"C:/opt/minecraft/server1", stdio:['pipe',1,1] })
-        runningServers[SN]=spawn('java',  ['-jar',servers[SN].jar],  {cwd:servers[SN].cwd, stdio:['pipe',1,1] })
+
+            runningServers[SN]=spawn('java',  ['-jar',servers[SN].jar],  {cwd:servers[SN].cwd, stdio:['pipe','pipe','pipe'] })
+            runningServers[SN].on('error',(data)=>{
+                var newData = {
+                    name:SN,
+                    type:"error",
+                    log:data.toString()+"\n"
+                }
+                console.log(newData)
+                socket.emit("stdOut",newData)
+                servers[SN].log.push(newData.log);
+            })
+            runningServers[SN].stdout.on('data',(data)=>{
+                var newData = {
+                    name:SN,
+                    log:data.toString()
+                }
+                console.log(newData)
+                socket.emit("stdOut",newData)
+                servers[SN].log.push(newData.log);
+            })
+        
     })
     socket.on("stopServer",(data)=>{
         if(data){
-            var SN = data.name | 'minecraftServer'
+            var SN = data.name
         }else{
             var SN = 'minecraftServer'
         }
-        runningServers[SN].stdin.write("stop\n")
-    })
-    socket.on("uninstallServer",()=>{
+        if(runningServers[SN] && runningServers[SN].connected){
+
+            runningServers[SN].on('error',(data)=>{
+                var newData = {
+                    name:SN,
+                    type:"error",
+                    log:data.toString()
+                }
+                console.log(newData)
+                socket.emit("stdOut",newData)
+                servers[SN].log.push(newData.log);
+            })
+            console.log(runningServers[SN])
+            console.log(runningServers[SN].stdin)
+            runningServers[SN].stdin.write("stop\n")
+        }else{
+            var newData = {
+                name:SN,
+                type:"error",
+                log:"Server "+SN+" isn't running\n"
+            }
+            console.log(newData)
+            socket.emit("stdOut",newData)
+        }})
+
+        socket.on("uninstallServer",()=>{
         exec("cd ../..; ./minecraftCommands.sh uninstall",puts)
     })
     socket.on("installServer",()=>{

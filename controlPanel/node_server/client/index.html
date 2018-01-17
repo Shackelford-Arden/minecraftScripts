@@ -22,17 +22,39 @@
   socket.on("connected", function(){
       console.log("Connection was made!");
       });
-
-    function startServer(){
-      console.log("startingServer")
-      socket.emit("startServer");
+    socket.on("stdOut",function(data){
+        console.log(data);
+        var SN = data.name
+        var term = document.getElementById(SN+"-stdout")
+        term.innerHTML += data.log;
+        term.scrollTop=term.scrollHeight
+    })
+    socket.on("servers",function(servers){
+        console.log("recieved server list: ",servers)
+        $('#serverList')[0].innerHTML=null;
+        for(s in servers){
+            console.log("creating server: ",s)
+            createServerExpandable(s);
+            var term = document.getElementById(s+"-stdout")
+            for(l in servers[s].log){
+                term.innerHTML += servers[s].log[l];
+                term.scrollTop=term.scrollHeight
+                
+            }
+        }
+    })
+    function startServer(SN){
+      console.log("startingServer:",SN)
+      var data={name:SN}
+      socket.emit("startServer",data);
+    }
+    function stopServer(SN){
+        console.log("stopingServer:",SN)
+        var data={name:SN}
+        socket.emit("stopServer",data);
     }
     function editServer(){
         console.log("Gonna edit something")
-    }
-    function stopServer(){
-        console.log("stopingServer")
-        socket.emit("stopServer");
     }
     function uninstallServer(){
         console.log("removing server installation")
@@ -108,8 +130,7 @@
                                                 </div>
                                                 <div class="title">Minecraft Server</div>
                                             </div>
-                                            <pre class="body">
-    commands
+                                            <pre id="serverOutput" class="body">
                                             </pre>
                                         </div>
                                 </div>
@@ -133,7 +154,6 @@
                                                 <div class="title">Minecraft Server</div>
                                             </div>
                                             <pre class="body">
-    commands
                                             </pre>
                                         </div>
                                 </div>
@@ -157,7 +177,6 @@
                                                 <div class="title">Minecraft Server</div>
                                             </div>
                                             <pre class="body">
-    commands
                                             </pre>
                                         </div>
                                 </div>
