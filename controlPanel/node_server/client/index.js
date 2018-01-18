@@ -27,6 +27,7 @@ function createServerExpandable(serverName){
    tpre.setAttribute('id',serverName+"-stdout")
    startBtn.innerHTML = "Start";
    startBtn.setAttribute("serverName",serverName)
+   $('.collapsible').collapsible();
    startBtn.addEventListener("click",function(event){
       console.log(event)
       var SN = serverName;
@@ -38,10 +39,9 @@ function createServerExpandable(serverName){
    stopBtn.addEventListener("click",function(event){
       console.log(event)
       stopServer(serverName)
-      event.preventDefault();
+      event.preventDefault()
    })
 
-   $('.collapsible').collapsible();
 }
 
 

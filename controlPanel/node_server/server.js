@@ -29,9 +29,11 @@ var cp = require('child_process');
 var exec = cp.exec;
 var spawn = cp.spawn;
 var runningServers = {}
+if(process.platform == "win32"){var installDirParent = "C:/opt/minecraft/"}else{var installDirParent = "/opt/minecraft/"}
+console.log("Platform: ",process.platform)
 var servers = {
     minecraftServer:{
-        cwd:"/opt/minecraft/server1",
+        cwd:installDirParent+"server1",
         name:"minecraftServer",
         jar:'craftbukkit.jar',
         maxRam:'-Xmx1G',
@@ -39,7 +41,7 @@ var servers = {
         log:[]
     },
     bukkit:{
-        cwd:"C:/opt/minecraft/server2",
+        cwd:"/opt/minecraft/server2",
         name:"bukkit",
         jar:'craftbukkit.jar',
         maxRam:'-Xmx1G',
@@ -47,6 +49,7 @@ var servers = {
         log:[]
     }
 }
+console.log("servers: ",servers)
 //include the modules for our server functions
 var command = require('./consoleCommands');
 
@@ -98,7 +101,7 @@ io.listen(server).on('connection', (socket)=>{
             })
             runningServers[SN].stdout.on('data',(data)=>{
                 var newData = {
-                    name:SN,
+                    name:SN,runningServer:runningServers[SN],
                     log:data.toString()
                 }
                 console.log(newData)
