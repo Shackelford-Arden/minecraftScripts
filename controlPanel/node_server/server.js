@@ -101,7 +101,7 @@ io.listen(server).on('connection', (socket)=>{
             })
             runningServers[SN].stdout.on('data',(data)=>{
                 var newData = {
-                    name:SN,runningServer:runningServers[SN],
+                    name:SN,
                     log:data.toString()
                 }
                 console.log(newData)
