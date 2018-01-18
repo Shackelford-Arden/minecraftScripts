@@ -11,7 +11,7 @@ case $key in
     -n|--servername|--name)
     serverName="$2"
     minecraftServer="$serverName"
-    installDir="/opt/$serverName"
+    installDir="/opt/minecraft/$serverName"
     ;;
     -v|--mcversion)
     vanillaVersion="$2"
@@ -74,7 +74,7 @@ if [ -z "$serverType"     ]; then serverType="forge";           fi
 # if versions aren't supplied in CLA or serverProperties, get reccomended versions.
 if [ -z "$vanillaVersion" ]; then vanillaVersion=getReccomendedVanilla; fi
 if [ -z "$forgeVersion"   ]; then forgeVersion=getReccomendedForge;     fi
-if [ -z "$installDir"     ]; then installDir="/opt/$minecraftServer";   fi
+if [ -z "$installDir"     ]; then installDir="/opt/minecraft/$minecraftServer";   fi
 if [ -z "$Xms"            ]; then Xms=1G;                               fi
 if [ -z "$Xmx"            ]; then Xmx=1G;                               fi
 # Start MC Server

@@ -2,7 +2,7 @@
 
 /**************************************************************
 *  Minecraft Dashboard Backend Server
-*  Author(s): Weston Clark
+*  Author(s): Weston Clark,Cody Nichols
 *
 *  Description:
 *  This node server will serve as a back-end for the Minecraft
