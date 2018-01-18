@@ -148,17 +148,7 @@ io.listen(server).on('connection', (socket)=>{
         exec("cd ../..; ./minecraftCommands.sh installForge",puts)
         // console.log("Stoped Server")
     })
-// I would like to use these, but module.exports aren't working right with exec()
-    // socket.on("startServer",        command.startServer);
-    // socket.on("stopServer",         command.stopServer);
-    // socket.on("runBabkup",          command.runBabkup);
-    // socket.on("renderMap",          command.renderMap);
-    // socket.on("installVanillaServer",command.installVanillaServer);
-    // socket.on("uninstallServer",    command.uninstallServer);
-    // socket.on("installForgeServer", command.installForgeServer);
+
 });
 app.use(express.static('client'))
-// app.get('*', function (req, res) {
-//     res.sendfile(__dirname + '/client/');
-//   });
   
