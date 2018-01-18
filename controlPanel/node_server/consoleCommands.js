@@ -16,6 +16,8 @@
 **************************************************************/
 
 module.exports = {
+
+  cp : require('child_process'),
   installVanillaServer: function(){
     //stop the MC server
     require('child_process').exec("../../minecraftCommands.sh installVanilla")
@@ -32,12 +34,19 @@ module.exports = {
     //stop the MC server
     require('child_process').exec("../../minecraftCommands.sh stopServer")
   },
-
-  startServer: function(){
+  startServer: function(ServerLocation){
     //start the MC server
     console.log("starting Server")
-    require('child_process').exec("../../minecraftCommands.sh startServer")
+    // require('child_process').exec("../../minecraftCommands.sh startServer")
+    var minecraftServerProcess = this.cp.spawn('java', [
+      '-Xmx512M',
+      '-Xms256M',
+      '-jar',
+      ServerLocation,
+      'nogui'
+    ]);
     console.log("started Server")
+    return minecraftServerProcess;
   },
   
   runBackup: function(){
