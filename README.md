@@ -18,5 +18,9 @@ Run the `installControlPanel.sh` script, it will install node, npm, and download
 ### Install Minecraft w/ Forge
 The `installmcForge.sh` script will find the latest version of Vanilla Minecraft Server and Forge server and install them. It will also install any needed dependencies such as Java and Tmux.
 use command line args if you want something specific.
-
-
+`--servername` name of server, and install folder
+`-v`|`--mcversion` version for vanilla minecraft
+`-f`|`--forgeversion` version for forge
+`-t`|`--servertype` "forge" or "vanilla"
+`-xms`|`--xms` Minimum ram for vm
+`-xmx`|`--xmx` Maximum ram for vm
