@@ -20,15 +20,23 @@
 
 // set up needed modules
 const PORT = 8080;
-var express = require('express')
-var app = express();
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
-var util = require('util');
-var cp = require('child_process');
-var exec = cp.exec;
-var spawn = cp.spawn;
-var runningServers = {}
+var express = require('express'),
+    app = express(),
+    server = require('http').Server(app),
+    http = require('http'),
+    io = require('socket.io')(server),
+    util = require('util'),
+    cp = require('child_process'),
+    exec = cp.exec,
+    spawn = cp.spawn,
+    runningServers = {},
+    MCVersionList=[],
+    FVersionList=[],
+    MCLatestVersion,FLatestVersion0
+
+getVanillaVersions()
+getForgeVersions()
+
 if(process.platform == "win32"){var installDirParent = "C:/opt/minecraft/"}else{var installDirParent = "/opt/minecraft/"}
 console.log("Platform: ",process.platform)
 var servers = {
@@ -152,3 +160,36 @@ io.listen(server).on('connection', (socket)=>{
 });
 app.use(express.static('client'))
   
+
+
+
+    // Get latest Vanilla 
+function getVanillaVersions(){
+
+    http.get("http://launchermeta.mojang.com/mc/game/version_manifest.json",(response)=>{
+        body=""
+        response.on("data",(chunk)=>{
+            body += chunk;
+        })
+        response.on('end',()=>{
+            if(response.statusCode === 200){
+                try{
+                    var tmpJSON=JSON.parse(body)
+                    MCLatestVersion = tmpJSON.latest.release
+                    for (v in tmpJSON.versions){
+                        if(tmpJSON.versions[i].type == 'release')
+                        MCVersionList.push(tmpJSON.versions[i].id)
+                    }
+                }catch(error){
+                    MCVersionList=['1.12.2'];MCLatestVersion='1.12.2';
+                }
+            }else{
+                MCVersionList=['1.12.2'];MCLatestVersion='1.12.2';
+            }
+        })
+    })
+    
+} 
+function getForgeVersions(){
+
+}

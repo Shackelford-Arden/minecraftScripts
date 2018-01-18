@@ -33,6 +33,7 @@ function createServerExpandable(serverName){
       var SN = serverName;
       startServer(SN)
       event.preventDefault();
+      event.stopPropagation();
    })
    stopBtn.innerHTML = "Stop";
    stopBtn.setAttribute("serverName",serverName)
@@ -40,6 +41,7 @@ function createServerExpandable(serverName){
       console.log(event)
       stopServer(serverName)
       event.preventDefault()
+      event.stopPropagation()
    })
 
 }
