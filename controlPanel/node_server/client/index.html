@@ -24,6 +24,7 @@
       });
     socket.on("version",function(data){
         vanillaVer = data;
+        setVanllaDropdown(socket)
     })
     socket.on("stdOut",function(data){
         console.log(data);
@@ -149,7 +150,7 @@
                                     <option value="1.11.1">1.11.1</option>
                                 </select>
                             </div>
-                            <div class="input-field col s3">
+                            <div class="input-field col s4">
                                 <label>Forge Version</label>  
                                 <select id="forgeVer" class="">
                                     <option value="" disabled selected></option>

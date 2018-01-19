@@ -31,13 +31,11 @@ var express = require('express'),
     spawn = cp.spawn,
     runningServers = {},
     request = require('request'),
-    cheerio = require('cheerio');
+    cheerio = require('cheerio'),
     vanillaVerion=getVanillaVersions(),
-    forgeVersion=getForgeVersions(vanillaVerion.recommended),
-console.log("vanilla: ",vanillaVerion)
-console.log("forge:   ",forgeVersion)
-getVanillaVersions()
-getForgeVersions()
+    forgeVersion
+getForgeVersions(vanillaVerion.recommended)
+.then((data)=>{forgeVersion = data})
 
 if(process.platform == "win32"){var installDirParent = "C:/opt/minecraft/"}else{var installDirParent = "/opt/minecraft/"}
 console.log("Platform: ",process.platform)
@@ -83,8 +81,16 @@ io.listen(server).on('connection', (socket)=>{
     // socket.emit("fver",forgeVersion)
     socket.emit("version",vanillaVerion)
     //listen for what method to call
-    socket.on("getForgeVersions",(vanillaVer)=>{
-        return getForgeVersions(vanillaVer)
+    socket.on("getForgeVersions",(vanillaVer,returnFunction)=>{
+        getForgeVersions(vanillaVer)
+        .then((data)=>{
+            returnFunction(data)
+        })
+        .catch((data)=>{
+            returnFunction(data)
+        })
+        // console.log("getForgeVersions: ",data)
+        // returnFunction(data)
     })
     socket.on("startServer",(data)=>{
         if(data){
@@ -186,15 +192,18 @@ function getVanillaVersions(){
             if(response.statusCode === 200){
                 try{
                     var tmpJSON=JSON.parse(body)
+                    // console.log("MCVer: ",tmpJSON)
                     retData.recommended = tmpJSON.latest.release
                     for (v in tmpJSON.versions){
-                        if(tmpJSON.versions[i].type == 'release')
-                        retData.versions.push(tmpJSON.versions[i].id)
+                        if(tmpJSON.versions[v].type == 'release')
+                        retData.versions.push(tmpJSON.versions[v].id)
                     }
                 }catch(error){
+                    // console.log("Catch Vanilla: ",error)
                     retData.versions=['1.12.2'];retData.recommended='1.12.2';
                 }
             }else{
+                // console.log("Vanilla not 200")
                 retData.versions=['1.12.2'];retData.recommended='1.12.2';
             }
         })
@@ -202,27 +211,44 @@ function getVanillaVersions(){
     return retData;
 } 
 function getForgeVersions(vanillaVer){
+return new Promise((resolve,reject)=>{
+    
     var retData ={
         recommended:"",
         versions:[]
     }
+    console.log("vanillaVer",vanillaVer)
     if(vanillaVer){
         url = 'http://files.minecraftforge.net/maven/net/minecraftforge/forge/index_'+vanillaVer+'.html';
     }else{
         url = 'http://files.minecraftforge.net/';
     }
+    console.log('url',url)
     request(url, function(error, response, html){
-    if(!error){
-        var $ = cheerio.load(html);
-        $('.promos-content .download .promo-recommended~small').filter(function(){
-            var data = $(this);
-            retData.recommended = data.text();
-        })
-        $('.download-list tbody td.download-version').filter(function(){
-            var data = $(this);
-            retData.versions.push(data.text().trim())
-        })
+        if(!error){
+            if (html.toString().includes("404 Not Found") ){
+                console.log("Forge: No forge version for this release")
+                reject(false)
+            }
+            var $ = cheerio.load(html);
+            $('.promos-content .download .promo-recommended~small').filter(function(){
+                var data = $(this);
+                console.log("recommended",data.text())
+                var string = data.text()
+                string = string.replace(/\s/g, "");
+                retData.recommended = string;
+            })
+            $('.download-list tbody td.download-version').filter(function(){
+                var data = $(this);
+                var string = data.text()
+                string = string.replace(/\s/g, "");
+                retData.versions.push(vanillaVer+"-"+string)
+            })
+            console.log("Forge: ",retData)
+            resolve(retData);
+        }else{
+            reject(false)
         }
     })
-    return retData;
+})
 }
