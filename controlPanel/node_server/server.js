@@ -30,10 +30,12 @@ var express = require('express'),
     exec = cp.exec,
     spawn = cp.spawn,
     runningServers = {},
-    MCVersionList=[],
-    FVersionList=[],
-    MCLatestVersion,FLatestVersion0
-
+    request = require('request'),
+    cheerio = require('cheerio');
+    vanillaVerion=getVanillaVersions(),
+    forgeVersion=getForgeVersions(vanillaVerion.recommended),
+console.log("vanilla: ",vanillaVerion)
+console.log("forge:   ",forgeVersion)
 getVanillaVersions()
 getForgeVersions()
 
@@ -78,7 +80,12 @@ io.listen(server).on('connection', (socket)=>{
     console.log("The server and client are connected");
     socket.emit("connected");
     socket.emit("servers",servers)
+    // socket.emit("fver",forgeVersion)
+    socket.emit("version",vanillaVerion)
     //listen for what method to call
+    socket.on("getForgeVersions",(vanillaVer)=>{
+        return getForgeVersions(vanillaVer)
+    })
     socket.on("startServer",(data)=>{
         if(data){
             var SN = data.name
@@ -165,6 +172,10 @@ app.use(express.static('client'))
 
     // Get latest Vanilla 
 function getVanillaVersions(){
+    var retData ={
+        recommended:"",
+        versions:[]
+    }
 
     http.get("http://launchermeta.mojang.com/mc/game/version_manifest.json",(response)=>{
         body=""
@@ -175,21 +186,43 @@ function getVanillaVersions(){
             if(response.statusCode === 200){
                 try{
                     var tmpJSON=JSON.parse(body)
-                    MCLatestVersion = tmpJSON.latest.release
+                    retData.recommended = tmpJSON.latest.release
                     for (v in tmpJSON.versions){
                         if(tmpJSON.versions[i].type == 'release')
-                        MCVersionList.push(tmpJSON.versions[i].id)
+                        retData.versions.push(tmpJSON.versions[i].id)
                     }
                 }catch(error){
-                    MCVersionList=['1.12.2'];MCLatestVersion='1.12.2';
+                    retData.versions=['1.12.2'];retData.recommended='1.12.2';
                 }
             }else{
-                MCVersionList=['1.12.2'];MCLatestVersion='1.12.2';
+                retData.versions=['1.12.2'];retData.recommended='1.12.2';
             }
         })
     })
-    
+    return retData;
 } 
-function getForgeVersions(){
-
+function getForgeVersions(vanillaVer){
+    var retData ={
+        recommended:"",
+        versions:[]
+    }
+    if(vanillaVer){
+        url = 'http://files.minecraftforge.net/maven/net/minecraftforge/forge/index_'+vanillaVer+'.html';
+    }else{
+        url = 'http://files.minecraftforge.net/';
+    }
+    request(url, function(error, response, html){
+    if(!error){
+        var $ = cheerio.load(html);
+        $('.promos-content .download .promo-recommended~small').filter(function(){
+            var data = $(this);
+            retData.recommended = data.text();
+        })
+        $('.download-list tbody td.download-version').filter(function(){
+            var data = $(this);
+            retData.versions.push(data.text().trim())
+        })
+        }
+    })
+    return retData;
 }

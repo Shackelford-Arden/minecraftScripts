@@ -22,6 +22,9 @@
   socket.on("connected", function(){
       console.log("Connection was made!");
       });
+    socket.on("version",function(data){
+        vanillaVer = data;
+    })
     socket.on("stdOut",function(data){
         console.log(data);
         var SN = data.name
@@ -43,6 +46,18 @@
             }
         }
     })
+    function createServer(){
+        var data = {
+            servername:document.querySelector('#name').value,
+            maxMem:document.querySelector('#maxMem').value,
+            minMem:document.querySelector('#minMem').value,
+            vanilla:document.querySelector('#vanillaVer').value,
+            forge:document.querySelector('#forgeVer').value,
+            isForge:document.querySelector('#forgeCheckbox').checked ? true:false
+        }
+        console.log("Creating Server",data)
+        socket.emit("createServer",data)
+    }
     function startServer(SN){
       console.log("startingServer:",SN)
       var data={name:SN}
@@ -106,6 +121,54 @@
                 </div>
             </div>
 
+            <div class="row card blue-grey lighten-1">
+                <div class="card-content white-text">
+                    <div class="card-title">Create New Server</div>
+                    <form action="#">
+                        <div class="row">
+                            <div class="input-field col s6">
+                                <input name="name" id="name" type="text">
+                                <label for="name">Server Name</label>
+                            </div>
+                            <div class="input-field col s3">
+                                <input name="maxRam" id="maxMem" type="text">
+                                <label for="maxRam">Max Ram</label>
+                            </div>
+                            <div class="input-field col s3">
+                                <input name="maxRam" id="minMem" type="text">
+                                <label for="minRam">Min Ram</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="input-field col s2">
+                                <label>MC Version</label>       
+                                <select id="vanillaVer" class="">
+                                    <option value="" disabled selected></option>
+                                    <option value="1.12.2">1.12.2</option>
+                                    <option value="1.12.1">1.12.1</option>
+                                    <option value="1.11.1">1.11.1</option>
+                                </select>
+                            </div>
+                            <div class="input-field col s3">
+                                <label>Forge Version</label>  
+                                <select id="forgeVer" class="">
+                                    <option value="" disabled selected></option>
+                                    <option value="1.12.1">1.12.1</option>
+                                    <option value="1.112.1">1.112.1</option>
+                                    <option value="1.11.1">1.11.1</option>
+                                </select>
+                            </div>
+                            <div class="input-field col s5">
+                                <input type="checkbox" id="forgeCheckbox">
+                                <label for="forgeCheckbox">Create Forge Server</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <button onclick="createServer()" class="btn waves-light right">Create Server</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
             <div class="row card blue-grey lighten-1">
                 <div class="card-content white-text">
                     <span class="card-title"><h3>The Beginning and End...</h3></span>

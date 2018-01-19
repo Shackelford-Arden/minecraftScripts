@@ -1,7 +1,17 @@
+var vanillaVer,forgeVer,newServer={}
+
+
+
 function connectedToServer(){
    console.log("Connection to the server was established...");
 }
-
+$(document).ready(function() {
+      $('select').material_select();
+      $('form').submit(function(e){
+            return false;
+      })
+      $('vanillaVer').onchange()
+    });
 function createServerExpandable(serverName){
    var list = $('#serverList')[0],
          li = newElem(list,"li"),
