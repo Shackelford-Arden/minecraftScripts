@@ -3,8 +3,9 @@
     "cheerio": "^1.0.0-rc.2",
     "child-process": "^1.0.2",
     "express": "^4.16.2",
+    "materialize-css": "^0.100.2",
+    "request": "latest",
     "socket.io": "^2.0.3",
-    "socketio": "^1.0.0",
-    "request": "latest"
+    "socketio": "^1.0.0"
   }
 }
