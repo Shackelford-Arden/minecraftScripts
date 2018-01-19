@@ -165,6 +165,33 @@ io.listen(server).on('connection', (socket)=>{
         socket.on("uninstallServer",()=>{
         exec("cd ../..; ./minecraftCommands.sh uninstall",puts)
     })
+    socket.on("createServer",(data,returnFunction)=>{
+        if(data){
+            var inst = "cd ../..; ./minecraftCommands.sh install "
+            inst += " -n "+data.servername
+            inst += " -v "+data.vanilla
+            inst += " -f "+data.forge
+            inst += " --xms "+data.minMem
+            inst += " --xmx "+data.maxMem
+            if (data.isForge){
+                //is forge install.
+                inst += " -t forge"
+                exec(inst,puts)
+                .then(()=>{
+                    returnFunction("finished installing forge")
+                })
+            }else{
+                //is vanilla
+                inst += " -t vanilla"
+                exec(inst,puts)
+                .then(()=>{
+                    returnFunction("finished installing vanilla")
+                })
+            }
+        }else{
+            returnFunction("No Data Sent")
+        }
+    })
     socket.on("installServer",()=>{
         exec("cd ../..; ./minecraftCommands.sh installForge",puts)
         // console.log("Stoped Server")

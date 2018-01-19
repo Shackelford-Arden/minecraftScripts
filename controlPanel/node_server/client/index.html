@@ -16,71 +16,6 @@
 <body class="blue-grey darken-3">
 
 <script>
-  console.log("We are in the setup");
-//   var socket =  io.connect("//64.52.84.42:8080");
-  var socket =  io.connect(window.location.hostname+":8080");
-  socket.on("connected", function(){
-      console.log("Connection was made!");
-      });
-    socket.on("version",function(data){
-        vanillaVer = data;
-        setVanllaDropdown(socket)
-    })
-    socket.on("stdOut",function(data){
-        console.log(data);
-        var SN = data.name
-        var term = document.getElementById(SN+"-stdout")
-        term.innerHTML += data.log;
-        term.scrollTop=term.scrollHeight
-    })
-    socket.on("servers",function(servers){
-        console.log("recieved server list: ",servers)
-        $('#serverList')[0].innerHTML=null;
-        for(s in servers){
-            console.log("creating server: ",s)
-            createServerExpandable(s);
-            var term = document.getElementById(s+"-stdout")
-            for(l in servers[s].log){
-                term.innerHTML += servers[s].log[l];
-                term.scrollTop=term.scrollHeight
-                
-            }
-        }
-    })
-    function createServer(){
-        var data = {
-            servername:document.querySelector('#name').value,
-            maxMem:document.querySelector('#maxMem').value,
-            minMem:document.querySelector('#minMem').value,
-            vanilla:document.querySelector('#vanillaVer').value,
-            forge:document.querySelector('#forgeVer').value,
-            isForge:document.querySelector('#forgeCheckbox').checked ? true:false
-        }
-        console.log("Creating Server",data)
-        socket.emit("createServer",data)
-    }
-    function startServer(SN){
-      console.log("startingServer:",SN)
-      var data={name:SN}
-      socket.emit("startServer",data);
-    }
-    function stopServer(SN){
-        console.log("stopingServer:",SN)
-        var data={name:SN}
-        socket.emit("stopServer",data);
-    }
-    function editServer(){
-        console.log("Gonna edit something")
-    }
-    function uninstallServer(){
-        console.log("removing server installation")
-        socket.emit("uninstallServer");
-    }
-
-    function installServer(){
-        console.log("creating server installation")
-        socket.emit("installServer");
-    }
   
 </script>
 
@@ -128,8 +63,8 @@
                     <form action="#">
                         <div class="row">
                             <div class="input-field col s6">
-                                <input name="name" id="name" type="text">
-                                <label for="name">Server Name</label>
+                                <input data-error="Name your server" name="name" id="name" type="text">
+                                <label class="validate" for="name">Server Name</label>
                             </div>
                             <div class="input-field col s3">
                                 <input name="maxRam" id="maxMem" type="text">
@@ -163,6 +98,9 @@
                                 <input type="checkbox" id="forgeCheckbox">
                                 <label for="forgeCheckbox">Create Forge Server</label>
                             </div>
+                        </div>
+                        <div class="row">
+                            <div id="creationMessage"></div>
                         </div>
                         <div class="row">
                             <button onclick="createServer()" class="btn waves-light right">Create Server</button>
