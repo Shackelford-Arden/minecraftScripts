@@ -167,6 +167,7 @@ io.listen(server).on('connection', (socket)=>{
     })
     socket.on("createServer",(data,returnFunction)=>{
         if(data){
+            console.log("Creating Server",data.servername)
             var inst = "cd ../..; ./minecraftCommands.sh install "
             inst += " -n "+data.servername
             inst += " -v "+data.vanilla
@@ -176,16 +177,16 @@ io.listen(server).on('connection', (socket)=>{
             if (data.isForge){
                 //is forge install.
                 inst += " -t forge"
-                exec(inst,puts)
-                .then(()=>{
-                    returnFunction("finished installing forge")
+                var installer = exec(inst,puts)
+                installer.addListener("exit",(data)=>{
+                    returnFunction("finished installing forge",data)
                 })
             }else{
                 //is vanilla
                 inst += " -t vanilla"
-                exec(inst,puts)
-                .then(()=>{
-                    returnFunction("finished installing vanilla")
+                var installer = exec(inst,puts)
+                installer.addListener("exit",(data)=>{
+                    returnFunction("finished installing vanilla",data)
                 })
             }
         }else{
@@ -194,7 +195,6 @@ io.listen(server).on('connection', (socket)=>{
     })
     socket.on("installServer",()=>{
         exec("cd ../..; ./minecraftCommands.sh installForge",puts)
-        // console.log("Stoped Server")
     })
 
 });
@@ -219,18 +219,15 @@ function getVanillaVersions(){
             if(response.statusCode === 200){
                 try{
                     var tmpJSON=JSON.parse(body)
-                    // console.log("MCVer: ",tmpJSON)
                     retData.recommended = tmpJSON.latest.release
                     for (v in tmpJSON.versions){
                         if(tmpJSON.versions[v].type == 'release')
                         retData.versions.push(tmpJSON.versions[v].id)
                     }
                 }catch(error){
-                    // console.log("Catch Vanilla: ",error)
                     retData.versions=['1.12.2'];retData.recommended='1.12.2';
                 }
             }else{
-                // console.log("Vanilla not 200")
                 retData.versions=['1.12.2'];retData.recommended='1.12.2';
             }
         })
@@ -260,7 +257,7 @@ return new Promise((resolve,reject)=>{
             var $ = cheerio.load(html);
             $('.promos-content .download .promo-recommended~small').filter(function(){
                 var data = $(this);
-                console.log("recommended",data.text())
+                // console.log("recommended",data.text())
                 var string = data.text()
                 string = string.replace(/\s/g, "");
                 retData.recommended = string;
@@ -271,7 +268,7 @@ return new Promise((resolve,reject)=>{
                 string = string.replace(/\s/g, "");
                 retData.versions.push(vanillaVer+"-"+string)
             })
-            console.log("Forge: ",retData)
+            // console.log("Forge: ",retData)
             resolve(retData);
         }else{
             reject(false)
