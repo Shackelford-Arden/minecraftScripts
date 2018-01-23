@@ -25,15 +25,14 @@ var express = require('express'),
     server = require('http').Server(app),
     http = require('http'),
     io = require('socket.io')(server),
-    util = require('util'),
     cp = require('child_process'),
     exec = cp.exec,
     spawn = cp.spawn,
-    runningServers = {},
     request = require('request'),
     cheerio = require('cheerio'),
     vanillaVerion = getVanillaVersions(),
     forgeVersion
+var command = require('./consoleCommands');
 getForgeVersions(vanillaVerion.recommended)
     .then((data) => {
         forgeVersion = data
@@ -44,7 +43,6 @@ if (process.platform == "win32") {
 } else {
     var installDirParent = "/opt/minecraft/"
 }
-console.log("Platform: ", process.platform)
 /***************************
  * TODO: load current servers, either 
  * from a file that is maintained by this app
@@ -60,6 +58,7 @@ var servers = {
         jar: 'craftbukkit.jar',
         maxRam: '-Xmx1G',
         minRam: '-Xms512M',
+        properties:{},
         log: []
     },
     bukkit: {
@@ -68,18 +67,13 @@ var servers = {
         jar: 'craftbukkit.jar',
         maxRam: '-Xmx1G',
         minRam: '-Xms512M',
+        properties:{},
         log: []
     }
 }
-console.log("servers: ", servers)
 //include the modules for our server functions
-var command = require('./consoleCommands');
 
-//define how arguments are used in the terminal
-var puts = function (error, stdout, stderr) {
-    'use strict';
-    util.print(stdout);
-};
+
 
 //create the server and start listening on the defined port
 // var server = http.createServer();
@@ -107,82 +101,35 @@ io.listen(server).on('connection', (socket) => {
     socket.on("startServer", (data) => {
         if (data) {
             var SN = data.name
-        } else {
-            var SN = 'minecraftServer'
-        }
-        if (runningServers[SN] && runningServers[SN].connected) {
-            var newData = {
-                name: SN,
-                log: SN + " Server is already running\n"
-            }
-            console.log(newData)
-            socket.emit("stdOut", newData)
-            servers[SN].log.push(newData.log);
-        }
-        // servers[SN]=spawn('java',  ['-jar','craftbukkit.jar'],  {cwd:"C:/opt/minecraft/server1", stdio:['pipe',1,1] })
-
-        runningServers[SN] = spawn('java', ['-jar', servers[SN].jar], {
-            cwd: servers[SN].cwd,
-            stdio: ['pipe', 'pipe', 'pipe']
-        })
-        runningServers[SN].on('error', (data) => {
-            var newData = {
-                name: SN,
-                type: "error",
-                log: data.toString() + "\n"
-            }
-            console.log(newData)
-            socket.emit("stdOut", newData)
-            servers[SN].log.push(newData.log);
-        })
-        runningServers[SN].stdout.on('data', (data) => {
-            var newData = {
-                name: SN,
-                log: data.toString()
-            }
-            console.log(newData)
-            socket.emit("stdOut", newData)
-            servers[SN].log.push(newData.log);
-        })
+        } else {return;}
+        command.startServer(socket,SN,servers[SN])
 
     })
     socket.on("stopServer", (data) => {
         if (data) {
             var SN = data.name
-        } else {
-            var SN = 'minecraftServer'
-        }
-        if (runningServers[SN] && runningServers[SN].connected) {
-
-            runningServers[SN].on('error', (data) => {
-                var newData = {
-                    name: SN,
-                    type: "error",
-                    log: data.toString()
-                }
-                console.log(newData)
-                socket.emit("stdOut", newData)
-                servers[SN].log.push(newData.log);
-            })
-            console.log(runningServers[SN])
-            console.log(runningServers[SN].stdin)
-            runningServers[SN].stdin.write("stop\n")
-        } else {
-            var newData = {
-                name: SN,
-                type: "error",
-                log: "Server " + SN + " isn't running\n"
-            }
-            console.log(newData)
-            socket.emit("stdOut", newData)
-        }
+        } else {return;}
+        command.stopServer(socket,SN,servers[SN]);
     })
 
-    socket.on("uninstallServer", () => {
-        exec("cd ../..; ./minecraftCommands.sh uninstall", puts)
+    socket.on("uninstallServer", (data) => {
+        if (data) {
+            var SN = data.name
+        } else { return; }
+        command.uninstallServer(servers[SN])
     })
     socket.on("createServer", (data, returnFunction) => {
         if (data) {
+            var SN = data.serverName;
+            server={
+                cwd: installDirParent + SN,
+                name: SN,
+                vanillaVer:data.vanilla,
+                maxRam: data.maxMem,
+                minRam: data.minMem,
+                log: []
+            }
+            command.installServer(socket,server)
             console.log("Creating Server", data.servername)
             var inst = "cd ../..; ./minecraftCommands.sh install "
             inst += " -n " + data.servername
@@ -209,7 +156,8 @@ io.listen(server).on('connection', (socket) => {
             returnFunction("No Data Sent")
         }
     })
-    socket.on("installServer", () => {
+    socket.on("installServer", (data) => {
+        command.installServer(socket,data)
         exec("cd ../..; ./minecraftCommands.sh installForge", puts)
     })
 
