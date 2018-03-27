@@ -47,7 +47,8 @@ exports.setProperties=function(server){
    var propOutString = stringify(server.properties)
    fs.writeFileSync(server.cwd+"/server.properties",propOutString)
 }
-exports.getProperties=function(propFile){return parse(fs.readFileSync(propFile))}
+exports.getProperties=function(server){return parse(fs.readFileSync(server.cwd+"/server.properties"))}
+exports.getPropertiesFromFile=function(propFile){return parse(fs.readFileSync(propFile))}
 exports.getServers = function(parentDir){
    if(!parentDir)return null;
    var servers = {};
@@ -67,7 +68,9 @@ exports.getServers = function(parentDir){
             servers[files[file]]={
                cwd: parentDir +"/"+ files[file],
                name: files[file],
-               properties:properties
+               properties:properties,
+               maxMem:"1G",
+               minMem:"512mb"
             }
          }
          

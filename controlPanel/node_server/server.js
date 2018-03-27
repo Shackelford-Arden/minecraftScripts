@@ -120,7 +120,7 @@ io.listen(server).on('connection', (socket) => {
     })
     socket.on("createServer", (data, returnFunction) => {
         if (data) {
-            var SN = data.serverName;
+            var SN = data.servername;
             server={
                 cwd: installDirParent + SN,
                 name: SN,
@@ -130,28 +130,28 @@ io.listen(server).on('connection', (socket) => {
                 log: []
             }
             command.installServer(socket,server)
-            console.log("Creating Server", data.servername)
-            var inst = "cd ../..; ./minecraftCommands.sh install "
-            inst += " -n " + data.servername
-            inst += " -v " + data.vanilla
-            inst += " -f " + data.forge
-            inst += " --xms " + data.minMem
-            inst += " --xmx " + data.maxMem
-            if (data.isForge) {
-                //is forge install.
-                inst += " -t forge"
-                var installer = exec(inst, puts)
-                installer.addListener("exit", (data) => {
-                    returnFunction("finished installing forge", data)
-                })
-            } else {
-                //is vanilla
-                inst += " -t vanilla"
-                var installer = exec(inst, puts)
-                installer.addListener("exit", (data) => {
-                    returnFunction("finished installing vanilla", data)
-                })
-            }
+            // console.log("Creating Server", data.servername)
+            // var inst = "cd ../..; ./minecraftCommands.sh install "
+            // inst += " -n " + data.servername
+            // inst += " -v " + data.vanilla
+            // inst += " -f " + data.forge
+            // inst += " --xms " + data.minMem
+            // inst += " --xmx " + data.maxMem
+            // if (data.isForge) {
+            //     //is forge install.
+            //     inst += " -t forge"
+            //     var installer = exec(inst, puts)
+            //     installer.addListener("exit", (data) => {
+            //         returnFunction("finished installing forge", data)
+            //     })
+            // } else {
+            //     //is vanilla
+            //     inst += " -t vanilla"
+            //     var installer = exec(inst, puts)
+            //     installer.addListener("exit", (data) => {
+            //         returnFunction("finished installing vanilla", data)
+            //     })
+            // }
         } else {
             returnFunction("No Data Sent")
         }
