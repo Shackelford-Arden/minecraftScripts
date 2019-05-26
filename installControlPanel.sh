@@ -48,9 +48,12 @@ then
 fi
 
 cd "$( dirname "$0" )"
-cd "./controlPanel/node_server"
+cd "./controlPanel"
 npm install
+cd "./node_server"
 
+# TODO: create user for MC
+#       `chown` all folders/files in the CP dir and /opt/minecraft
 
 
 

@@ -12,6 +12,8 @@ case $key in
     serverName="$2"
     minecraftServer="$serverName"
     installDir="/opt/minecraft/$serverName"
+    shift # past argument
+    shift # past value
     ;;
     -v|--mcversion)
     vanillaVersion="$2"
@@ -35,9 +37,13 @@ case $key in
     ;;
     --xms|-xms)
     Xms="$2"
+    shift # past argument
+    shift # past value
     ;;
     --xmx|-xmx)
     Xmx="$2"
+    shift # past argument
+    shift # past value
     ;;
     *)    # unknown option
     POSITIONAL+=("$1") # save it in an array for later
@@ -265,7 +271,7 @@ installServer() {
     mkdir ${installDir}
     if [[ -d $installDir ]]; then
       echo "Installation directory has been created in ${installDir}."
-      echo "Continuing threw script."
+      echo "Continuing through script."
     else
       echo "Installation directory could not be created."
       echo "This is likely due to permissions."
@@ -455,12 +461,12 @@ case $action in
   backupServer
   ;;
 "installVanilla")
-  getLatestVersions
+  # getLatestVersions
   serverType="vanilla"
   installServer
   ;;
 "install" | "installForge")
-  getLatestVersions
+  # getLatestVersions
   # serverType="forge"
   installServer
   ;;

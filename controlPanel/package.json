@@ -1,7 +1,12 @@
 {
   "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
     "child-process": "^1.0.2",
     "express": "^4.16.2",
+    "fs-extra": "^5.0.0",
+    "js-yaml": "^3.10.0",
+    "materialize-css": "^0.100.2",
+    "request": "^2.83.0",
     "socket.io": "^2.0.3",
     "socketio": "^1.0.0"
   }

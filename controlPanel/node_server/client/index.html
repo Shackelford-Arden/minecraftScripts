@@ -4,69 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Project Blocky</title>
-    <link rel="stylesheet" type="text/css" href="materialize/css/materialize.min.css">
-    <link rel="stylesheet" type="text/css" href="styles/terminal.css">
-    <link rel="stylesheet" type="text/css" href="styles/main.css">
+    <link rel="stylesheet" type="text/css" href="/materialize/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/styles/terminal.css">
+    <link rel="stylesheet" type="text/css" href="/styles/main.css">
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-    <!-- <script src="node_modules/socket.io-client/dist/socket.io.js"></script> -->
+    <script type="text/javascript" src="/materialize/js/materialize.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="index.js"></script>
+    <script src="/index.js"></script>
 </head>
 
 <body class="blue-grey darken-3">
-
-<script>
-  console.log("We are in the setup");
-//   var socket =  io.connect("//64.52.84.42:8080");
-  var socket =  io.connect(window.location.hostname+":8080");
-  socket.on("connected", function(){
-      console.log("Connection was made!");
-      });
-    socket.on("stdOut",function(data){
-        console.log(data);
-        var SN = data.name
-        var term = document.getElementById(SN+"-stdout")
-        term.innerHTML += data.log;
-        term.scrollTop=term.scrollHeight
-    })
-    socket.on("servers",function(servers){
-        console.log("recieved server list: ",servers)
-        $('#serverList')[0].innerHTML=null;
-        for(s in servers){
-            console.log("creating server: ",s)
-            createServerExpandable(s);
-            var term = document.getElementById(s+"-stdout")
-            for(l in servers[s].log){
-                term.innerHTML += servers[s].log[l];
-                term.scrollTop=term.scrollHeight
-                
-            }
-        }
-    })
-    function startServer(SN){
-      console.log("startingServer:",SN)
-      var data={name:SN}
-      socket.emit("startServer",data);
-    }
-    function stopServer(SN){
-        console.log("stopingServer:",SN)
-        var data={name:SN}
-        socket.emit("stopServer",data);
-    }
-    function editServer(){
-        console.log("Gonna edit something")
-    }
-    function uninstallServer(){
-        console.log("removing server installation")
-        socket.emit("uninstallServer");
-    }
-
-    function installServer(){
-        console.log("creating server installation")
-        socket.emit("installServer");
-    }
-  
-</script>
 
     <nav class="nav-extended">
 
@@ -106,6 +53,57 @@
                 </div>
             </div>
 
+            <div class="row card blue-grey lighten-1">
+                <div class="card-content white-text">
+                    <div class="card-title">Create New Server</div>
+                    <form action="#">
+                        <div class="row">
+                            <div class="input-field col s6">
+                                <input data-error="Name your server" name="name" id="name" type="text">
+                                <label class="validate" for="name">Server Name</label>
+                            </div>
+                            <div class="input-field col s3">
+                                <input name="maxRam" id="maxMem" type="text">
+                                <label for="maxRam">Max Ram</label>
+                            </div>
+                            <div class="input-field col s3">
+                                <input name="maxRam" id="minMem" type="text">
+                                <label for="minRam">Min Ram</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="input-field col s2">
+                                <label>MC Version</label>       
+                                <select id="vanillaVer" class="">
+                                    <option value="" disabled selected></option>
+                                    <option value="1.12.2">1.12.2</option>
+                                    <option value="1.12.1">1.12.1</option>
+                                    <option value="1.11.1">1.11.1</option>
+                                </select>
+                            </div>
+                            <div class="input-field col s4">
+                                <label>Forge Version</label>  
+                                <select id="forgeVer" class="">
+                                    <option value="" disabled selected></option>
+                                    <option value="1.12.1">1.12.1</option>
+                                    <option value="1.112.1">1.112.1</option>
+                                    <option value="1.11.1">1.11.1</option>
+                                </select>
+                            </div>
+                            <div class="input-field col s5">
+                                <input type="checkbox" id="forgeCheckbox">
+                                <label for="forgeCheckbox">Create Forge Server</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div id="creationMessage"></div>
+                        </div>
+                        <div class="row">
+                            <button onclick="createServer()" class="btn waves-light right">Create Server</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
             <div class="row card blue-grey lighten-1">
                 <div class="card-content white-text">
                     <span class="card-title"><h3>The Beginning and End...</h3></span>
